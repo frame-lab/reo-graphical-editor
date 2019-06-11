@@ -4,11 +4,39 @@ const reoIMonarchLanguage = require('./reo/reo');
 const ReoInterpreter = require('./compiler');
 let channelTypes = require('./channels');
 
+// drawing parameters
+var nodeFillColourSource = '#fff';
+var nodeFillColourSink = '#fff';
+var nodeFillColourMixed = '#000';
+var nodeFactor = 4;
+
+var lineFillColour = '#000';
+var lineStrokeColour = '#000';
+var lineStrokeWidth = 1;
+
+var arrowFactor = 8;
+var arrowOffsetOut = lineStrokeWidth * nodeFactor + 4;
+var arrowOffsetIn = arrowOffsetOut + arrowFactor;
+
+var fifoHeight = 30;
+var fifoWidth = 10;
+var fifoFillColour = '#fff';
+
+var buttonBorderOff = '0.5vmin solid white';
+var buttonBorderOn = '0.5vmin solid black';
+
+var mergeDistance = 20;
+var headerHeight = 30;
+var loopRadius = 25;
+
+var splitSelected = 'lightgreen';
+var splitDeselected = 'lightblue';
+
 // Initialize code editor
-monaco.languages.register({id: 'reo'});
+monaco.languages.register({ id: 'reo' });
 monaco.languages.setMonarchTokensProvider('reo', reoIMonarchLanguage.language);
 monaco.languages.setLanguageConfiguration('reo', reoIMonarchLanguage.conf);
-const codeEditor = monaco.editor.create(document.getElementById('text'), {language: 'reo'});
+const codeEditor = monaco.editor.create(document.getElementById('text'), { language: 'reo' });
 
 async function loadSource(fileName, cb) {
 	let client = new XMLHttpRequest();
@@ -58,9 +86,9 @@ function resizeElements() {
 		});
 
 		// Reset the label position
-		main.label.set({left: x1 + (x2 - x1) / 2, top: y1 + 15});
+		main.label.set({ left: x1 + (x2 - x1) / 2, top: y1 + 15 });
 		main.label.setCoords();
-		main.header.set({x1: x1, y1: y1 + headerHeight, x2: x2, y2: y1 + headerHeight});
+		main.header.set({ x1: x1, y1: y1 + headerHeight, x2: x2, y2: y1 + headerHeight });
 		main.header.setCoords();
 		canvas.requestRenderAll()
 	}
@@ -78,33 +106,6 @@ let nodes = [], channels = [], components = [];
 
 loadChannels();
 
-// drawing parameters
-nodeFillColourSource = '#fff';
-nodeFillColourSink = '#fff';
-nodeFillColourMixed = '#000';
-nodeFactor = 4;
-
-lineFillColour = '#000';
-lineStrokeColour = '#000';
-lineStrokeWidth = 1;
-
-arrowFactor = 8;
-arrowOffsetOut = lineStrokeWidth * nodeFactor + 4;
-arrowOffsetIn = arrowOffsetOut + arrowFactor;
-
-fifoHeight = 30;
-fifoWidth = 10;
-fifoFillColour = '#fff';
-
-buttonBorderOff = '0.5vmin solid white';
-buttonBorderOn = '0.5vmin solid black';
-
-mergeDistance = 20;
-headerHeight = 30;
-loopRadius = 25;
-
-splitSelected = 'lightgreen';
-splitDeselected = 'lightblue';
 
 function buttonClick(button) {
 	let i;
@@ -116,7 +117,7 @@ function buttonClick(button) {
 
 	for (i = 0; i < components.length; ++i) {
 		components[i].set('selectable', mode === 'select');
-		components[i].label.set({selectable: mode === 'select', hoverCursor: mode === 'select' ? 'text' : 'default'});
+		components[i].label.set({ selectable: mode === 'select', hoverCursor: mode === 'select' ? 'text' : 'default' });
 		if (components[i].copy)
 			components[i].copy.set({
 				selectable: mode === 'select',
@@ -138,7 +139,7 @@ function buttonClick(button) {
 			selectable: mode === 'select' || mode === 'split',
 			hoverCursor: mode === 'select' || mode === 'split' ? 'move' : 'default'
 		});
-		nodes[i].label.set({selectable: mode === 'select', hoverCursor: mode === 'select' ? 'text' : 'default'});
+		nodes[i].label.set({ selectable: mode === 'select', hoverCursor: mode === 'select' ? 'text' : 'default' });
 		nodes[i].selection.set('visible', false)
 	}
 	for (i = 0; i < channels.length; ++i)
@@ -151,7 +152,7 @@ function buttonClick(button) {
 }
 
 document.getElementById("select").onclick = () => buttonClick(document.getElementById("select"));
-document.getElementById("split").onclick = () => buttonClick(document.getElementById("split"));
+// document.getElementById("split").onclick = () => buttonClick(document.getElementById("split"));
 document.getElementById("component").onclick = () => buttonClick(document.getElementById("component"));
 
 /**
@@ -160,7 +161,11 @@ document.getElementById("component").onclick = () => buttonClick(document.getEle
  */
 async function download(format) {
 	format = format || 'svg';
-
+	// const shell = require('shelljs');
+	//shell.exec(comandToExecute, {silent:true}).stdout;
+	//you need little improvisation
+	// shell.config.execPath = shell.which('/usr/bin/node');
+	// shell.exec('ls');
 	const a = document.createElement('a');
 	a.download = "reo." + format;
 	switch (format) {
@@ -171,7 +176,7 @@ async function download(format) {
 			a.href = "data:image/svg+xml;base64," + window.btoa(canvas.toSVG());
 			break;
 		case 'treo':
-			a.href = window.URL.createObjectURL(new Blob([codeEditor.getValue()], {type: "text/plain"}));
+			a.href = window.URL.createObjectURL(new Blob([codeEditor.getValue()], { type: "text/plain" }));
 			break;
 	}
 	a.click()
@@ -181,15 +186,15 @@ document.getElementById("downloadSVG").onclick = async () => download();
 document.getElementById("downloadPNG").onclick = async () => download('png');
 document.getElementById("downloadTreo").onclick = async () => download('treo');
 
-document.getElementById("submit").onclick = async function () {
-	ReoInterpreter.parse(codeEditor.getValue(), listener);  // FIXME code should not be collected from editor (because of the comment switch)
-	try {
-		clearAll();
-		eval(listener.generateCode())
-	} catch (e) {
-		alert(e)
-	}
-};
+// document.getElementById("submit").onclick = async function () {
+// 	ReoInterpreter.parse(codeEditor.getValue(), listener);  // FIXME code should not be collected from editor (because of the comment switch)
+// 	try {
+// 		clearAll();
+// 		eval(listener.generateCode())
+// 	} catch (e) {
+// 		alert(e)
+// 	}
+// };
 
 document.getElementById("commentSwitch").onclick = function () {
 	updateText()
@@ -198,7 +203,7 @@ document.getElementById("commentSwitch").onclick = function () {
 // Channel defining modal
 const modal = document.getElementById('newChannelModal');
 
-document.getElementById("newChannel").onclick = () => modal.style.display = "block";
+// document.getElementById("newChannel").onclick = () => modal.style.display = "block";
 document.getElementsByClassName("close")[0].onclick = () => modal.style.display = "none";
 document.getElementById("createChannel").onclick = () => {
 	loadChannel(JSON.parse(document.getElementById("channelProperties").value));
@@ -289,7 +294,7 @@ function createNode(left, top, name, manual) {
 		hoverCursor: mode === 'select' ? 'text' : 'default'
 	});
 
-	node.set({label: label, labelOffsetX: 10, labelOffsetY: -20});
+	node.set({ label: label, labelOffsetX: 10, labelOffsetY: -20 });
 	label.on('editing:exited', function () {
 		label.object.set('id', label.text)
 	});
@@ -496,7 +501,7 @@ function completeChannelCreation(channel, node1, node2, manual) {
 
 	for (i = 0; i < p.channels.length; ++i)
 		updateChannel(p.channels[i]);
-	p.label.set({left: p.left + p.labelOffsetX, top: p.top + p.labelOffsetY});
+	p.label.set({ left: p.left + p.labelOffsetX, top: p.top + p.labelOffsetY });
 	p.label.setCoords();
 
 	// merge with existing nodes, except node2 of the same channel
@@ -646,7 +651,7 @@ function setParent(p) {
 function updateNode(node, keepParent) {
 	// set node coordinates
 	node.label.setCoords();
-	node.set({labelOffsetX: node.label.left - node.left, labelOffsetY: node.label.top - node.top});
+	node.set({ labelOffsetX: node.label.left - node.left, labelOffsetY: node.label.top - node.top });
 	for (let i = nodes.length - 1; i >= 0; --i) {
 		// prevent comparing the node with itself
 		if (nodes[i] === node) continue;
@@ -678,11 +683,11 @@ function updateNodeColouring(node) {
 
 	if (source) {
 		if (sink)
-			node.set({nodeType: 'mixed', fill: nodeFillColourMixed});
+			node.set({ nodeType: 'mixed', fill: nodeFillColourMixed });
 		else
-			node.set({nodeType: 'source', fill: nodeFillColourSource})
+			node.set({ nodeType: 'source', fill: nodeFillColourSource })
 	} else
-		node.set({nodeType: 'sink', fill: nodeFillColourSink});
+		node.set({ nodeType: 'sink', fill: nodeFillColourSink });
 	canvas.requestRenderAll()
 }
 
@@ -703,11 +708,11 @@ function updateChannel(channel) {
 			// convert new size to scaling
 			const length = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
 			const scale = length / channel.parts[0].baseLength;
-			channel.parts[0].set({scaleX: scale, scaleY: scale});
+			channel.parts[0].set({ scaleX: scale, scaleY: scale });
 			channel.parts[0].setCoords();
 			break;
 		case 'circle':
-			channel.parts[0].set({left: x1, top: y1 - loopRadius});
+			channel.parts[0].set({ left: x1, top: y1 - loopRadius });
 			channel.parts[0].setCoords()
 	}
 
@@ -715,19 +720,19 @@ function updateChannel(channel) {
 	for (let i = 1; i < channel.parts.length; ++i) {
 		const o = channel.parts[i];
 		if (o.type === 'line')
-			o.set({x1: x1, y1: y1, x2: x2, y2: y2});
+			o.set({ x1: x1, y1: y1, x2: x2, y2: y2 });
 		else {
 			if (!o.relationship) throw new Error("No relationship found");
 			const newTransform = fabric.util.multiplyTransformMatrices(channel.parts[0].calcTransformMatrix(), o.relationship, false);
 			let opt = fabric.util.qrDecompose(newTransform);
-			o.set({flipX: false, flipY: false});
+			o.set({ flipX: false, flipY: false });
 			o.setPositionByOrigin(new fabric.Point(opt.translateX, opt.translateY), 'center', 'center');
 			o.set(opt);
 			if (o.scale === false) {
 				if (o.type === 'image')
-					o.set({scaleX: o.baseScaleX, scaleY: o.baseScaleY});
+					o.set({ scaleX: o.baseScaleX, scaleY: o.baseScaleY });
 				else
-					o.set({scaleX: 1, scaleY: 1})
+					o.set({ scaleX: 1, scaleY: 1 })
 			}
 			if (o.rotate === false)
 				o.set('angle', o.baseAngle);
@@ -784,7 +789,7 @@ function snapToComponent(node, comp) {
 	if (node.top < comp.top) // top side
 		node.set('top', comp.top);
 	node.setCoords();
-	node.label.set({left: node.left + node.labelOffsetX, top: node.top + node.labelOffsetY});
+	node.label.set({ left: node.left + node.labelOffsetX, top: node.top + node.labelOffsetY });
 	node.label.setCoords();
 	node.label.bringToFront();
 	for (let i = 0; i < node.channels.length; ++i)
@@ -797,20 +802,20 @@ function snapToComponent(node, comp) {
  * @param c - The component that is being moved or resized
  */
 function repositionParts(c) {
-	c.label.set({left: c.left + (c.scaleX * c.width) / 2, top: c.top + 15});
+	c.label.set({ left: c.left + (c.scaleX * c.width) / 2, top: c.top + 15 });
 	c.label.setCoords();
-	c.header.set({x1: c.left, y1: c.top + headerHeight, x2: c.left + c.scaleX * c.width, y2: c.top + headerHeight});
+	c.header.set({ x1: c.left, y1: c.top + headerHeight, x2: c.left + c.scaleX * c.width, y2: c.top + headerHeight });
 	c.header.setCoords();
 	if (c.delete) {
-		c.delete.set({left: c.left + 15, top: c.top + 15});
+		c.delete.set({ left: c.left + 15, top: c.top + 15 });
 		c.delete.setCoords()
 	}
 	if (c.compactSwitch) {
-		c.compactSwitch.set({left: c.left + 35, top: c.top + 15});
+		c.compactSwitch.set({ left: c.left + 35, top: c.top + 15 });
 		c.compactSwitch.setCoords()
 	}
 	if (c.copy) {
-		c.copy.set({left: c.left + 55, top: c.top + 15});
+		c.copy.set({ left: c.left + 55, top: c.top + 15 });
 		c.copy.setCoords()
 	}
 }
@@ -995,34 +1000,34 @@ canvas.on('mouse:down', function (e) {
 					case 'copy':
 						copyComponent(p.parent);
 						break;
-					case 'split':
-						buttonClick(document.getElementById("split"));
-						prepareSplit(p.parent)
+					// case 'split':
+					// 	buttonClick(document.getElementById("split"));
+					// 	prepareSplit(p.parent)
 				}
 			}
 			break;
 		case 'component':
 			createComponent(pointer.x, pointer.y, pointer.x, pointer.y, undefined, true);
 			break;
-		case 'split':
-			if (p) {
-				if (p.class && p.class === 'node') {
-					if (p.selection.visible === true) {
-						for (i = 0; i < p.channels.length; ++i)
-							if (p.channels[i].parts[0].fill === splitSelected) {
-								splitNode(p);
-								break
-							}
-					} else
-						prepareSplit(p)
-				} else if (p.parent && p.parent.class === 'channel') {
-					p.set('fill', p.fill === splitSelected ? splitDeselected : splitSelected);
-					canvas.requestRenderAll()
-				}
-			}
-			break;
+		// case 'split':
+		// 	if (p) {
+		// 		if (p.class && p.class === 'node') {
+		// 			if (p.selection.visible === true) {
+		// 				for (i = 0; i < p.channels.length; ++i)
+		// 					if (p.channels[i].parts[0].fill === splitSelected) {
+		// 						splitNode(p);
+		// 						break
+		// 					}
+		// 			} else
+		// 				prepareSplit(p)
+		// 		} else if (p.parent && p.parent.class === 'channel') {
+		// 			p.set('fill', p.fill === splitSelected ? splitDeselected : splitSelected);
+		// 			canvas.requestRenderAll()
+		// 		}
+		// 	}
+		// 	break;
 		default:
-			createChannel(mode, {x: pointer.x, y: pointer.y}, {x: pointer.x, y: pointer.y}, true)
+			createChannel(mode, { x: pointer.x, y: pointer.y }, { x: pointer.x, y: pointer.y }, true)
 	}
 }); //mouse:down
 
@@ -1041,19 +1046,19 @@ canvas.on('mouse:move', function (e) {
 					p.set('left', x);
 				if (origY > y)
 					p.set('top', y);
-				p.set({width: Math.abs(origX - x), height: Math.abs(origY - y)});
+				p.set({ width: Math.abs(origX - x), height: Math.abs(origY - y) });
 				p.setCoords()
 			} else {
 				if (p.__corner !== 0)
 					repositionNodes(p);
 				else {
-					p.set({left: origLeft + x - origX, top: origTop + y - origY});
+					p.set({ left: origLeft + x - origX, top: origTop + y - origY });
 					p.setCoords();
 					for (i = 0; i < p.nodes.length; ++i) {
 						let node = p.nodes[i];
-						node.set({left: node.origLeft + x - origX, top: node.origTop + y - origY});
+						node.set({ left: node.origLeft + x - origX, top: node.origTop + y - origY });
 						node.setCoords();
-						node.label.set({left: node.left + node.labelOffsetX, top: node.top + node.labelOffsetY});
+						node.label.set({ left: node.left + node.labelOffsetX, top: node.top + node.labelOffsetY });
 						node.label.setCoords();
 						for (j = 0; j < node.channels.length; ++j)
 							updateChannel(node.channels[j])
@@ -1063,7 +1068,7 @@ canvas.on('mouse:move', function (e) {
 			repositionParts(p);
 			break;
 		case 'node':
-			p.set({left: x, top: y}).setCoords();
+			p.set({ left: x, top: y }).setCoords();
 			if (p.link)
 				p.link.set({
 					x1: p.link.nodes[0].left,
@@ -1073,7 +1078,7 @@ canvas.on('mouse:move', function (e) {
 				}).setCoords();
 			for (i = 0; i < nodes.length; ++i)
 				if (Math.abs(p.left - nodes[i].left) < mergeDistance && Math.abs(p.top - nodes[i].top) < mergeDistance)
-					p.set({left: nodes[i].left, top: nodes[i].top}).setCoords();
+					p.set({ left: nodes[i].left, top: nodes[i].top }).setCoords();
 
 			if (!fromBoundary) {
 				// Limit the node position to the parent
@@ -1140,12 +1145,12 @@ canvas.on('mouse:move', function (e) {
 				}
 			}
 
-			p.label.set({left: p.left + p.labelOffsetX, top: p.top + p.labelOffsetY});
+			p.label.set({ left: p.left + p.labelOffsetX, top: p.top + p.labelOffsetY });
 			if (p.delete)
-				p.delete.set({left: p.left - 15, top: p.top + 15}).setCoords();
+				p.delete.set({ left: p.left - 15, top: p.top + 15 }).setCoords();
 			if (p.split)
-				p.split.set({left: p.left + 15, top: p.top + 15}).setCoords();
-			p.selection.set({left: p.left, top: p.top}).setCoords();
+				p.split.set({ left: p.left + 15, top: p.top + 15 }).setCoords();
+			p.selection.set({ left: p.left, top: p.top }).setCoords();
 			for (i = 0; i < p.channels.length; ++i)
 				updateChannel(p.channels[i]);
 			break;
@@ -1168,7 +1173,7 @@ function onMouseUp() {
 					buttonClick(document.getElementById("select"));
 				break;
 			case 'component':
-				p.set({width: p.scaleX * p.width, height: p.scaleY * p.height, scaleX: 1, scaleY: 1});
+				p.set({ width: p.scaleX * p.width, height: p.scaleY * p.height, scaleX: 1, scaleY: 1 });
 				p.setCoords();
 				if (p.status === 'drawing')
 					p.set('status', 'design');
@@ -1179,7 +1184,7 @@ function onMouseUp() {
 				break;
 			case 'label':
 				p.setCoords();
-				p.object.set({labelOffsetX: p.left - p.object.left, labelOffsetY: p.top - p.object.top});
+				p.object.set({ labelOffsetX: p.left - p.object.left, labelOffsetY: p.top - p.object.top });
 				break
 		}
 		if (mode !== 'select')
@@ -1297,13 +1302,13 @@ function prepareSplit(node) {
 		if (nodes[j].selection.visible === true) {
 			nodes[j].selection.set('visible', false);
 			for (i = 0; i < nodes[j].channels.length; ++i)
-				nodes[j].channels[i].parts[0].set({fill: 'transparent', selectable: false, hoverCursor: 'default'});
+				nodes[j].channels[i].parts[0].set({ fill: 'transparent', selectable: false, hoverCursor: 'default' });
 			break
 		}
 	}
 	node.selection.set('visible', true);
 	for (i = 0; i < node.channels.length; ++i)
-		node.channels[i].parts[0].set({fill: splitDeselected, selectable: true, hoverCursor: 'pointer'});
+		node.channels[i].parts[0].set({ fill: splitDeselected, selectable: true, hoverCursor: 'pointer' });
 	canvas.requestRenderAll()
 }
 
@@ -1325,7 +1330,7 @@ function splitNode(source) {
 	destination.selection.set('visible', true);
 	updateNodeColouring(destination);
 	canvas.discardActiveObject(null);
-	source.set({lockMovementX: true, lockMovementY: true});
+	source.set({ lockMovementX: true, lockMovementY: true });
 	canvas.setActiveObject(destination);
 	bringNodeToFront(destination);
 	fromBoundary = true;
@@ -1498,9 +1503,9 @@ function deleteComponent(component, recursive) {
 
 function compactComponent(component) {
 	if (component.compact)
-		component.set({height: component.realHeight, width: component.realWidth});
+		component.set({ height: component.realHeight, width: component.realWidth });
 	else
-		component.set({realHeight: component.height, realWidth: component.width, height: 90, width: 110});
+		component.set({ realHeight: component.height, realWidth: component.width, height: 90, width: 110 });
 	component.compact = !component.compact;
 	repositionParts(component);
 	repositionNodes(component)
@@ -1512,7 +1517,7 @@ function copyComponent(p) {
 	let i, c;
 	for (i = 0; i < p.channels.length; ++i) {
 		c = p.channels[i];
-		createChannel(c.name, {x: c.node1.left + 20, y: c.node1.top + 20, name: c.node1.id}, {
+		createChannel(c.name, { x: c.node1.left + 20, y: c.node1.top + 20, name: c.node1.id }, {
 			x: c.node2.left + 20,
 			y: c.node2.top + 20,
 			name: c.node2.id
@@ -1597,7 +1602,7 @@ function createComponent(x1, y1, x2, y2, name, manual) {  // FIXME parent compon
 		lockMovementY: true,
 		selectable: mode === 'select'
 	});
-	component.set({label: label, header: header});
+	component.set({ label: label, header: header });
 
 	if (name !== 'main') {
 		const createAnchor = (img, cls) => {
@@ -1685,7 +1690,7 @@ function clearAll() {
 }
 
 var main = createComponent(25, 25, container.clientWidth - 25, container.clientHeight - 25, 'main');
-main.set({id: 'main', evented: false});
+main.set({ id: 'main', evented: false });
 buttonClick(document.getElementById("select"));
 updateText();
 resizeElements();
