@@ -4,7 +4,7 @@
 	"scripts": {
 		"build:prod": "cross-env NODE_ENV=production webpack",
 		"build:dev": "webpack",
-		"start": "http-server"
+		"start": "node src/server.js"
 	},
 	"dependencies": {
 		"monaco-editor": "^0.15.6",

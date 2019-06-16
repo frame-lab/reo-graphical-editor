@@ -1,0 +1,60 @@
+const http = require('http');
+const url = require('url');
+const fs = require('fs');
+const path = require('path');
+
+var mimeTypes = {
+    "html": "text/html",
+    "jpeg": "image/jpeg",
+    "jpg": "image/jpeg",
+    "png": "image/png",
+    "svg": "image/svg",
+    "js": "text/javascript",
+    "css": "text/css",
+    "treo": "text/treo"
+};
+
+http.createServer((request, response) => {
+    var pathname = url.parse(request.url).pathname;
+    var filename;
+    if (pathname === '/nuXmv') {
+        const { exec } = require('child_process');
+        response.writeHead(200, { 'Content-Type': 'text/plain' });
+        exec('asdad', (err, stdout, stderr) => {
+            if (err) {
+                console.log(err);
+                response.write(err.message);
+                response.end(err.message);
+                return;
+            }
+            // console.log(`stdout: ${stdout}`);
+            // console.log(`stderr: ${stderr}`);
+            response.write(stdout);
+            response.write(stderr);
+            response.end();
+        });
+    } else {
+        if (pathname === "/") {
+            filename = "./public/index.html";
+        }
+        else
+            filename = path.join('./public', pathname);
+        try {
+            fs.accessSync(filename, fs.F_OK);
+            var fileStream = fs.createReadStream(filename);
+            var mimeType = mimeTypes[path.extname(filename).split(".")[1]];
+            response.writeHead(200, { 'Content-Type': mimeType });
+            fileStream.pipe(response);
+        }
+        catch (e) {
+            console.log('File not exists: ' + filename);
+            response.writeHead(404, { 'Content-Type': 'text/plain' });
+            response.write('404 Not Found\n');
+            response.end();
+            return;
+        }
+    }
+    return;
+}).listen(8081, '127.0.0.1');
+
+console.log('Server running at http://127.0.0.1:8081/');

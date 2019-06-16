@@ -8,13 +8,13 @@ let isProduction = process.env.NODE_ENV === 'production';
 module.exports = {
 	mode: isProduction ? 'production' : 'development',
 	entry: {
-		"app": './src/app.js'
+		"app": './src/app.js',
 	},
 	output: {
 		filename: '[name].bundle.js',
 		path: path.resolve(__dirname, 'public')
 	},
-	node: {module: "empty", net: "empty", fs: "empty"},
+	node: { module: "empty", net: "empty", fs: "empty" },
 	optimization: isProduction ? {
 		minimizer: [
 			new TerserPlugin({
@@ -37,6 +37,6 @@ module.exports = {
 		}]
 	},
 	plugins: [
-		new MonacoWebpackPlugin({languages: ['reo']})
+		new MonacoWebpackPlugin({ languages: ['reo'] })
 	]
 };

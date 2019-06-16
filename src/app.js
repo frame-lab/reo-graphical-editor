@@ -155,17 +155,22 @@ document.getElementById("select").onclick = () => buttonClick(document.getElemen
 // document.getElementById("split").onclick = () => buttonClick(document.getElementById("split"));
 document.getElementById("component").onclick = () => buttonClick(document.getElementById("component"));
 
+printReturn = function (text) {
+	console.log(text);
+}
 /**
  * Exports the canvas to the desired format.
  * @param {String} [format] The format of the output image. Currently supporting "svg" (default), "png" and "treo".
  */
 async function download(format) {
 	format = format || 'svg';
+	console.log('it works');
 	// const shell = require('shelljs');
 	//shell.exec(comandToExecute, {silent:true}).stdout;
 	//you need little improvisation
 	// shell.config.execPath = shell.which('/usr/bin/node');
 	// shell.exec('ls');
+	httpGetAsync('http://127.0.0.1:8081/nuXmv', printReturn);
 	const a = document.createElement('a');
 	a.download = "reo." + format;
 	switch (format) {
@@ -185,6 +190,16 @@ async function download(format) {
 document.getElementById("downloadSVG").onclick = async () => download();
 document.getElementById("downloadPNG").onclick = async () => download('png');
 document.getElementById("downloadTreo").onclick = async () => download('treo');
+
+function httpGetAsync(theUrl, callback) {
+	var xmlHttp = new XMLHttpRequest();
+	xmlHttp.onreadystatechange = function () {
+		if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+			callback(xmlHttp.responseText);
+	}
+	xmlHttp.open("GET", theUrl, true); // true for asynchronous 
+	xmlHttp.send(null);
+}
 
 // document.getElementById("submit").onclick = async function () {
 // 	ReoInterpreter.parse(codeEditor.getValue(), listener);  // FIXME code should not be collected from editor (because of the comment switch)
