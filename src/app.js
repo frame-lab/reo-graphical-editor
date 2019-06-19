@@ -164,13 +164,6 @@ printReturn = function (text) {
  */
 async function download(format) {
 	format = format || 'svg';
-	console.log('it works');
-	// const shell = require('shelljs');
-	//shell.exec(comandToExecute, {silent:true}).stdout;
-	//you need little improvisation
-	// shell.config.execPath = shell.which('/usr/bin/node');
-	// shell.exec('ls');
-	httpGetAsync('http://127.0.0.1:8081/nuXmv', printReturn);
 	const a = document.createElement('a');
 	a.download = "reo." + format;
 	switch (format) {
@@ -183,6 +176,9 @@ async function download(format) {
 		case 'treo':
 			a.href = window.URL.createObjectURL(new Blob([codeEditor.getValue()], { type: "text/plain" }));
 			break;
+		case 'nuXmv':
+			httpPostAsync('http://127.0.0.1:8081/nuXmv', printReturn);
+			break;
 	}
 	a.click()
 }
@@ -190,15 +186,19 @@ async function download(format) {
 document.getElementById("downloadSVG").onclick = async () => download();
 document.getElementById("downloadPNG").onclick = async () => download('png');
 document.getElementById("downloadTreo").onclick = async () => download('treo');
+document.getElementById("nuXmv").onclick = async () => download('nuXmv');
 
-function httpGetAsync(theUrl, callback) {
+
+function httpPostAsync(theUrl, callback) {
 	var xmlHttp = new XMLHttpRequest();
+	var data = { content: codeEditor.getValue() }
 	xmlHttp.onreadystatechange = function () {
 		if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
 			callback(xmlHttp.responseText);
 	}
-	xmlHttp.open("GET", theUrl, true); // true for asynchronous 
-	xmlHttp.send(null);
+	xmlHttp.open("POST", theUrl, true); // true for asynchronous 
+	xmlHttp.setRequestHeader("Content-Type", "application/json");
+	xmlHttp.send(JSON.stringify(data));
 }
 
 // document.getElementById("submit").onclick = async function () {
