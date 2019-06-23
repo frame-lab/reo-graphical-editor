@@ -7,10 +7,11 @@
 		"start": "node src/server.js"
 	},
 	"dependencies": {
-		"monaco-editor": "^0.15.6",
 		"antlr4": "^4.7.2",
+		"archiver": "^3.0.0",
 		"fabric": "^2.6.0",
-		"http-server": "^0.11.1"
+		"http-server": "^0.11.1",
+		"monaco-editor": "^0.15.6"
 	},
 	"devDependencies": {
 		"cross-env": "^5.2.0",

@@ -155,8 +155,18 @@ document.getElementById("select").onclick = () => buttonClick(document.getElemen
 // document.getElementById("split").onclick = () => buttonClick(document.getElementById("split"));
 document.getElementById("component").onclick = () => buttonClick(document.getElementById("component"));
 
-printReturn = function (text) {
-	console.log(text);
+downloadResponse = function (response) {
+	var blob = new Blob([response], { type: "octet/stream" });
+	var fileName = "test.zip";
+	var a = document.createElement("a");
+	document.body.appendChild(a);
+	a.style = "display:none";
+	var url = window.URL.createObjectURL(blob);
+	a.href = url;
+	a.download = fileName;
+	a.click();
+	window.URL.revokeObjectURL(url);
+	a.remove();
 }
 /**
  * Exports the canvas to the desired format.
@@ -177,7 +187,7 @@ async function download(format) {
 			a.href = window.URL.createObjectURL(new Blob([codeEditor.getValue()], { type: "text/plain" }));
 			break;
 		case 'nuXmv':
-			httpPostAsync('http://127.0.0.1:8081/nuXmv', printReturn);
+			httpPostAsync('http://127.0.0.1:8081/nuXmv', downloadResponse);
 			break;
 	}
 	a.click()
@@ -194,10 +204,11 @@ function httpPostAsync(theUrl, callback) {
 	var data = { content: codeEditor.getValue() }
 	xmlHttp.onreadystatechange = function () {
 		if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
-			callback(xmlHttp.responseText);
+			callback(xmlHttp.response);
 	}
 	xmlHttp.open("POST", theUrl, true); // true for asynchronous 
 	xmlHttp.setRequestHeader("Content-Type", "application/json");
+	xmlHttp.responseType = "arraybuffer";
 	xmlHttp.send(JSON.stringify(data));
 }
 

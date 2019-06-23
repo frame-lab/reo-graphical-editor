@@ -3,3 +3,5 @@ node_modules/
 *.log
 *.bundle.js
 editor.worker.js
+.vscode/ipch/240b96fac98ff307/main.ipch
+.vscode/*

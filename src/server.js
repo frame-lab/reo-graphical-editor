@@ -2,7 +2,7 @@ const http = require('http');
 const url = require('url');
 const fs = require('fs');
 const path = require('path');
-var querystring = require('querystring');
+var archiver = require('archiver');
 
 var mimeTypes = {
     "html": "text/html",
@@ -20,20 +20,34 @@ http.createServer((request, response) => {
     var filename;
     if (pathname === '/nuXmv') {
         processPost(request, response, function () {
-            fs.writeFileSync("input.txt", request.post.content);
+            fs.writeFileSync("./Reo2nuXmv/input.txt", request.post.content);
 
             const { exec } = require('child_process');
-            response.writeHead(200, { 'Content-Type': 'text/plain' });
-            exec('./reo2nuXmv', (err, stdout, stderr) => {
+            exec('cd Reo2nuXmv && ./reo2nuXmv', (err, stdout, stderr) => {
                 if (err) {
                     console.log(err);
                     response.write(err.message);
                     response.end(err.message);
                     return;
                 }
-                response.write(stdout);
-                response.write(stderr);
-                response.end();
+                var archive = archiver('zip', {
+                    gzip: true,
+                    zlib: { level: 9 } // Sets the compression level.
+                });
+                archive.on('error', function (err) {
+                    throw err;
+                });
+                // pipe archive data to the output file
+                response.writeHead(200, {
+                    'Content-Type': 'application/zip',
+                    'Content-disposition': 'attachment; filename=myFile.zip'
+                });
+                archive.pipe(response);
+
+                // append files
+                archive.file('./Reo2nuXmv/nuxmv.smv', { name: 'componentProduct.txt' });
+                archive.file('./Reo2nuXmv/nuxmv2.smv', { name: 'compactProduct.txt' });
+                archive.finalize();
             });
         });
     } else {
@@ -85,4 +99,10 @@ function processPost(request, response, callback) {
         response.writeHead(405, { 'Content-Type': 'text/plain' });
         response.end();
     }
+}
+
+function zipper() {
+
+
+
 }
