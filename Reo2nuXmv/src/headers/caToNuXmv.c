@@ -70,9 +70,9 @@ void caToNuxmv(struct Automato *automato, struct StringList *ports, FILE *f)
             }
             fprintf(f, "((cs = %s & ", transitions->transition->start->name);
             nullPorts(ports, transitions->transition, f);
-            fprintf(f, "%s%s) -> next(cs) = %s)%s", transitions->transition->condition, transitions->transition->blocked == 1 ? " & FALSE" : "",
-                    transitions->transition->end->name, transitions->nextTransition != NULL ? " &\n\t" : "");
             tempStatesNames = delString(tempStatesNames, transitions->transition->end->name);
+            fprintf(f, "%s%s) -> next(cs) = %s)%s", transitions->transition->condition, transitions->transition->blocked == 1 ? " & FALSE" : "",
+                    transitions->transition->end->name, transitions->nextTransition != NULL || tempStatesNames ? " &\n\t" : "");
             transitions = transitions->nextTransition;
         }
         if (tempStatesNames)
@@ -82,12 +82,12 @@ void caToNuxmv(struct Automato *automato, struct StringList *ports, FILE *f)
                 fprintf(f, "TRANS\n\t");
                 printTrans = 0;
             }
-            fprintf(f, " &\n\t((cs = %s) -> (", states->state->name);
-        }
-        while (tempStatesNames != NULL)
-        {
-            fprintf(f, "(next(cs) != %s)%s", tempStatesNames->string, tempStatesNames->nextString != NULL ? " & " : "))");
-            tempStatesNames = tempStatesNames->nextString;
+            fprintf(f, "((cs = %s) -> (", states->state->name);
+            while (tempStatesNames != NULL)
+            {
+                fprintf(f, "(next(cs) != %s)%s", tempStatesNames->string, tempStatesNames->nextString != NULL ? " & " : "))");
+                tempStatesNames = tempStatesNames->nextString;
+            }
         }
         fprintf(f, "%s", states->nextState != NULL ? " &\n\t" : ";\n\n");
         states = states->nextState;
