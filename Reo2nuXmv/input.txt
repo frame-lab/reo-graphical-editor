@@ -1,0 +1,6 @@
+fifo(a,e)
+sync(e,b)
+fifo(e,f)
+sync(f,c)
+fifo(f,g)
+sync(g,d)

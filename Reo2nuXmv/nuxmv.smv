@@ -1,0 +1,397 @@
+MODULE main
+VAR
+	time: 0..3;
+	finalAutomata: finalAutomata(time);
+ASSIGN
+	init(time) := 0;
+	next(time) := case
+		time < 3: time + 1;
+		TRUE: time;
+esac;
+
+MODULE fifo1(time)
+VAR
+	ports: portsModule;
+	cs: {q0,p0,p1};
+ASSIGN
+	init(cs) := {q0};
+TRANS
+	((cs = q0 & ports.e[time] = NULL & ports.b[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.g[time] = NULL & ports.d[time] = NULL & ports.a[time] = 0) -> next(cs) = p0) &
+	((cs = q0 & ports.e[time] = NULL & ports.b[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.g[time] = NULL & ports.d[time] = NULL & ports.a[time] = 1) -> next(cs) = p1) &
+	((cs = p0 & ports.a[time] = NULL & ports.b[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.g[time] = NULL & ports.d[time] = NULL & ports.e[time] = 0 & FALSE) -> next(cs) = q0) &
+	((cs = p0) -> ((next(cs) != p1))) &
+	((cs = p1 & ports.a[time] = NULL & ports.b[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.g[time] = NULL & ports.d[time] = NULL & ports.e[time] = 1 & FALSE) -> next(cs) = q0) &
+	((cs = p1) -> ((next(cs) != p0)));
+
+MODULE sync2(time)
+VAR
+	ports: portsModule;
+	cs: {q0};
+TRANS
+	((cs = q0 & ports.a[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.g[time] = NULL & ports.d[time] = NULL & ports.e[time] != NULL & ports.e[time] = ports.b[time] & FALSE) -> next(cs) = q0);
+
+MODULE fifo3(time)
+VAR
+	ports: portsModule;
+	cs: {q0,p0,p1};
+ASSIGN
+	init(cs) := {q0};
+TRANS
+	((cs = q0 & ports.a[time] = NULL & ports.b[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.g[time] = NULL & ports.d[time] = NULL & ports.e[time] = 0 & FALSE) -> next(cs) = p0) &
+	((cs = q0 & ports.a[time] = NULL & ports.b[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.g[time] = NULL & ports.d[time] = NULL & ports.e[time] = 1 & FALSE) -> next(cs) = p1) &
+	((cs = p0 & ports.a[time] = NULL & ports.e[time] = NULL & ports.b[time] = NULL & ports.c[time] = NULL & ports.g[time] = NULL & ports.d[time] = NULL & ports.f[time] = 0) -> next(cs) = q0) &
+	((cs = p0) -> ((next(cs) != p1))) &
+	((cs = p1 & ports.a[time] = NULL & ports.e[time] = NULL & ports.b[time] = NULL & ports.c[time] = NULL & ports.g[time] = NULL & ports.d[time] = NULL & ports.f[time] = 1) -> next(cs) = q0) &
+	((cs = p1) -> ((next(cs) != p0)));
+
+MODULE sync4(time)
+VAR
+	ports: portsModule;
+	cs: {q0};
+TRANS
+	((cs = q0 & ports.a[time] = NULL & ports.e[time] = NULL & ports.b[time] = NULL & ports.g[time] = NULL & ports.d[time] = NULL & ports.f[time] != NULL & ports.f[time] = ports.c[time] & FALSE) -> next(cs) = q0);
+
+MODULE fifo5(time)
+VAR
+	ports: portsModule;
+	cs: {q0,p0,p1};
+ASSIGN
+	init(cs) := {q0};
+TRANS
+	((cs = q0 & ports.a[time] = NULL & ports.e[time] = NULL & ports.b[time] = NULL & ports.c[time] = NULL & ports.g[time] = NULL & ports.d[time] = NULL & ports.f[time] = 0 & FALSE) -> next(cs) = p0) &
+	((cs = q0 & ports.a[time] = NULL & ports.e[time] = NULL & ports.b[time] = NULL & ports.c[time] = NULL & ports.g[time] = NULL & ports.d[time] = NULL & ports.f[time] = 1 & FALSE) -> next(cs) = p1) &
+	((cs = p0 & ports.a[time] = NULL & ports.e[time] = NULL & ports.b[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.d[time] = NULL & ports.g[time] = 0) -> next(cs) = q0) &
+	((cs = p0) -> ((next(cs) != p1))) &
+	((cs = p1 & ports.a[time] = NULL & ports.e[time] = NULL & ports.b[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.d[time] = NULL & ports.g[time] = 1) -> next(cs) = q0) &
+	((cs = p1) -> ((next(cs) != p0)));
+
+MODULE sync6(time)
+VAR
+	ports: portsModule;
+	cs: {q0};
+TRANS
+	((cs = q0 & ports.a[time] = NULL & ports.e[time] = NULL & ports.b[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.g[time] != NULL & ports.g[time] = ports.d[time] & FALSE) -> next(cs) = q0);
+
+MODULE fifo1sync2(time)
+VAR
+	prod1: fifo1(time);
+	prod2: sync2(time);
+	ports: portsModule;
+	cs: {q0q0,p0q0,p1q0};
+ASSIGN
+	init(cs) := {q0q0};
+TRANS
+	((cs = p0q0 & ports.a[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.g[time] = NULL & ports.d[time] = NULL & ports.e[time] = 0 & ports.e[time] != NULL & ports.e[time] = ports.b[time] & FALSE) -> next(cs) = q0q0) &
+	((cs = p1q0 & ports.a[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.g[time] = NULL & ports.d[time] = NULL & ports.e[time] = 1 & ports.e[time] != NULL & ports.e[time] = ports.b[time] & FALSE) -> next(cs) = q0q0) &
+	((cs = p0q0) -> ((next(cs) != p1q0))) &
+	((cs = p1q0) -> ((next(cs) != p0q0)));
+INVAR
+	(((prod1.cs = q0) & (prod2.cs = q0)) <-> (cs = q0q0)) &
+	(((prod1.cs = p0) & (prod2.cs = q0)) <-> (cs = p0q0)) &
+	(((prod1.cs = p1) & (prod2.cs = q0)) <-> (cs = p1q0));
+
+MODULE fifo1sync2fifo3(time)
+VAR
+	prod1: fifo1sync2(time);
+	prod2: fifo3(time);
+	ports: portsModule;
+	cs: {q0q0q0,q0q0p0,q0q0p1,p0q0q0,p0q0p0,p0q0p1,p1q0q0,p1q0p0,p1q0p1};
+ASSIGN
+	init(cs) := {q0q0q0};
+TRANS
+	((cs = q0q0p0 & ports.e[time] = NULL & ports.b[time] = NULL & ports.c[time] = NULL & ports.g[time] = NULL & ports.d[time] = NULL & ports.a[time] = 0 & ports.f[time] = 0 & FALSE) -> next(cs) = p0q0q0) &
+	((cs = q0q0p0 & ports.e[time] = NULL & ports.b[time] = NULL & ports.c[time] = NULL & ports.g[time] = NULL & ports.d[time] = NULL & ports.a[time] = 1 & ports.f[time] = 0 & FALSE) -> next(cs) = p1q0q0) &
+	((cs = q0q0p1 & ports.e[time] = NULL & ports.b[time] = NULL & ports.c[time] = NULL & ports.g[time] = NULL & ports.d[time] = NULL & ports.a[time] = 0 & ports.f[time] = 1 & FALSE) -> next(cs) = p0q0q0) &
+	((cs = q0q0p1 & ports.e[time] = NULL & ports.b[time] = NULL & ports.c[time] = NULL & ports.g[time] = NULL & ports.d[time] = NULL & ports.a[time] = 1 & ports.f[time] = 1 & FALSE) -> next(cs) = p1q0q0) &
+	((cs = p0q0q0 & ports.a[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.g[time] = NULL & ports.d[time] = NULL & ports.e[time] = 0 & ports.e[time] != NULL & ports.e[time] = ports.b[time] & ports.e[time] = 0) -> next(cs) = q0q0p0) &
+	((cs = p0q0q0 & ports.a[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.g[time] = NULL & ports.d[time] = NULL & ports.e[time] = 0 & ports.e[time] != NULL & ports.e[time] = ports.b[time] & ports.e[time] = 1) -> next(cs) = q0q0p1) &
+	((cs = p1q0q0 & ports.a[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.g[time] = NULL & ports.d[time] = NULL & ports.e[time] = 1 & ports.e[time] != NULL & ports.e[time] = ports.b[time] & ports.e[time] = 0) -> next(cs) = q0q0p0) &
+	((cs = p1q0q0 & ports.a[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.g[time] = NULL & ports.d[time] = NULL & ports.e[time] = 1 & ports.e[time] != NULL & ports.e[time] = ports.b[time] & ports.e[time] = 1) -> next(cs) = q0q0p1) &
+	((cs = p1q0p0 & ports.a[time] = NULL & ports.e[time] = NULL & ports.b[time] = NULL & ports.c[time] = NULL & ports.g[time] = NULL & ports.d[time] = NULL & ports.f[time] = 0 & FALSE) -> next(cs) = p1q0q0) &
+	((cs = p1q0p1 & ports.a[time] = NULL & ports.e[time] = NULL & ports.b[time] = NULL & ports.c[time] = NULL & ports.g[time] = NULL & ports.d[time] = NULL & ports.f[time] = 1 & FALSE) -> next(cs) = p1q0q0) &
+	((cs = q0q0q0) -> ((next(cs) != q0q0p0) & (next(cs) != q0q0p1) & (next(cs) != p0q0p0) & (next(cs) != p0q0p1) & (next(cs) != p1q0p0) & (next(cs) != p1q0p1))) &
+	((cs = q0q0p0) -> ((next(cs) != q0q0q0) & (next(cs) != q0q0p1) & (next(cs) != p0q0p1) & (next(cs) != p1q0p1))) &
+	((cs = q0q0p1) -> ((next(cs) != q0q0q0) & (next(cs) != q0q0p0) & (next(cs) != p0q0p0) & (next(cs) != p1q0p0))) &
+	((cs = p0q0q0) -> ((next(cs) != q0q0q0) & (next(cs) != p0q0p0) & (next(cs) != p0q0p1) & (next(cs) != p1q0q0) & (next(cs) != p1q0p0) & (next(cs) != p1q0p1))) &
+	((cs = p0q0p0) -> ((next(cs) != q0q0q0) & (next(cs) != q0q0p0) & (next(cs) != q0q0p1) & (next(cs) != p0q0q0) & (next(cs) != p0q0p1) & (next(cs) != p1q0q0) & (next(cs) != p1q0p0) & (next(cs) != p1q0p1))) &
+	((cs = p0q0p1) -> ((next(cs) != q0q0q0) & (next(cs) != q0q0p0) & (next(cs) != q0q0p1) & (next(cs) != p0q0q0) & (next(cs) != p0q0p0) & (next(cs) != p1q0q0) & (next(cs) != p1q0p0) & (next(cs) != p1q0p1))) &
+	((cs = p1q0q0) -> ((next(cs) != q0q0q0) & (next(cs) != p0q0q0) & (next(cs) != p0q0p0) & (next(cs) != p0q0p1) & (next(cs) != p1q0p0) & (next(cs) != p1q0p1))) &
+	((cs = p1q0p0) -> ((next(cs) != q0q0q0) & (next(cs) != q0q0p0) & (next(cs) != q0q0p1) & (next(cs) != p0q0q0) & (next(cs) != p0q0p0) & (next(cs) != p0q0p1) & (next(cs) != p1q0p1))) &
+	((cs = p1q0p1) -> ((next(cs) != q0q0q0) & (next(cs) != q0q0p0) & (next(cs) != q0q0p1) & (next(cs) != p0q0q0) & (next(cs) != p0q0p0) & (next(cs) != p0q0p1) & (next(cs) != p1q0p0)));
+INVAR
+	(((prod1.cs = q0q0) & (prod2.cs = q0)) <-> (cs = q0q0q0)) &
+	(((prod1.cs = q0q0) & (prod2.cs = p0)) <-> (cs = q0q0p0)) &
+	(((prod1.cs = q0q0) & (prod2.cs = p1)) <-> (cs = q0q0p1)) &
+	(((prod1.cs = p0q0) & (prod2.cs = q0)) <-> (cs = p0q0q0)) &
+	(((prod1.cs = p0q0) & (prod2.cs = p0)) <-> (cs = p0q0p0)) &
+	(((prod1.cs = p0q0) & (prod2.cs = p1)) <-> (cs = p0q0p1)) &
+	(((prod1.cs = p1q0) & (prod2.cs = q0)) <-> (cs = p1q0q0)) &
+	(((prod1.cs = p1q0) & (prod2.cs = p0)) <-> (cs = p1q0p0)) &
+	(((prod1.cs = p1q0) & (prod2.cs = p1)) <-> (cs = p1q0p1));
+
+MODULE fifo1sync2fifo3sync4(time)
+VAR
+	prod1: fifo1sync2fifo3(time);
+	prod2: sync4(time);
+	ports: portsModule;
+	cs: {q0q0q0q0,q0q0p0q0,q0q0p1q0,p0q0q0q0,p0q0p0q0,p0q0p1q0,p1q0q0q0,p1q0p0q0,p1q0p1q0};
+ASSIGN
+	init(cs) := {q0q0q0q0};
+TRANS
+	((cs = q0q0p0q0 & ports.e[time] = NULL & ports.b[time] = NULL & ports.g[time] = NULL & ports.d[time] = NULL & ports.a[time] = 0 & ports.f[time] = 0 & ports.f[time] != NULL & ports.f[time] = ports.c[time] & FALSE) -> next(cs) = p0q0q0q0) &
+	((cs = q0q0p0q0 & ports.e[time] = NULL & ports.b[time] = NULL & ports.g[time] = NULL & ports.d[time] = NULL & ports.a[time] = 1 & ports.f[time] = 0 & ports.f[time] != NULL & ports.f[time] = ports.c[time] & FALSE) -> next(cs) = p1q0q0q0) &
+	((cs = q0q0p1q0 & ports.e[time] = NULL & ports.b[time] = NULL & ports.g[time] = NULL & ports.d[time] = NULL & ports.a[time] = 0 & ports.f[time] = 1 & ports.f[time] != NULL & ports.f[time] = ports.c[time] & FALSE) -> next(cs) = p0q0q0q0) &
+	((cs = q0q0p1q0 & ports.e[time] = NULL & ports.b[time] = NULL & ports.g[time] = NULL & ports.d[time] = NULL & ports.a[time] = 1 & ports.f[time] = 1 & ports.f[time] != NULL & ports.f[time] = ports.c[time] & FALSE) -> next(cs) = p1q0q0q0) &
+	((cs = p1q0p0q0 & ports.a[time] = NULL & ports.e[time] = NULL & ports.b[time] = NULL & ports.g[time] = NULL & ports.d[time] = NULL & ports.f[time] = 0 & ports.f[time] != NULL & ports.f[time] = ports.c[time] & FALSE) -> next(cs) = p1q0q0q0) &
+	((cs = p1q0p1q0 & ports.a[time] = NULL & ports.e[time] = NULL & ports.b[time] = NULL & ports.g[time] = NULL & ports.d[time] = NULL & ports.f[time] = 1 & ports.f[time] != NULL & ports.f[time] = ports.c[time] & FALSE) -> next(cs) = p1q0q0q0) &
+	((cs = q0q0q0q0) -> ((next(cs) != q0q0p0q0) & (next(cs) != q0q0p1q0) & (next(cs) != p0q0p0q0) & (next(cs) != p0q0p1q0) & (next(cs) != p1q0p0q0) & (next(cs) != p1q0p1q0))) &
+	((cs = q0q0p0q0) -> ((next(cs) != q0q0q0q0) & (next(cs) != q0q0p1q0) & (next(cs) != p0q0p1q0) & (next(cs) != p1q0p1q0))) &
+	((cs = q0q0p1q0) -> ((next(cs) != q0q0q0q0) & (next(cs) != q0q0p0q0) & (next(cs) != p0q0p0q0) & (next(cs) != p1q0p0q0))) &
+	((cs = p0q0q0q0) -> ((next(cs) != q0q0q0q0) & (next(cs) != p0q0p0q0) & (next(cs) != p0q0p1q0) & (next(cs) != p1q0q0q0) & (next(cs) != p1q0p0q0) & (next(cs) != p1q0p1q0))) &
+	((cs = p0q0p0q0) -> ((next(cs) != q0q0q0q0) & (next(cs) != q0q0p0q0) & (next(cs) != q0q0p1q0) & (next(cs) != p0q0q0q0) & (next(cs) != p0q0p1q0) & (next(cs) != p1q0q0q0) & (next(cs) != p1q0p0q0) & (next(cs) != p1q0p1q0))) &
+	((cs = p0q0p1q0) -> ((next(cs) != q0q0q0q0) & (next(cs) != q0q0p0q0) & (next(cs) != q0q0p1q0) & (next(cs) != p0q0q0q0) & (next(cs) != p0q0p0q0) & (next(cs) != p1q0q0q0) & (next(cs) != p1q0p0q0) & (next(cs) != p1q0p1q0))) &
+	((cs = p1q0q0q0) -> ((next(cs) != q0q0q0q0) & (next(cs) != p0q0q0q0) & (next(cs) != p0q0p0q0) & (next(cs) != p0q0p1q0) & (next(cs) != p1q0p0q0) & (next(cs) != p1q0p1q0))) &
+	((cs = p1q0p0q0) -> ((next(cs) != q0q0q0q0) & (next(cs) != q0q0p0q0) & (next(cs) != q0q0p1q0) & (next(cs) != p0q0q0q0) & (next(cs) != p0q0p0q0) & (next(cs) != p0q0p1q0) & (next(cs) != p1q0p1q0))) &
+	((cs = p1q0p1q0) -> ((next(cs) != q0q0q0q0) & (next(cs) != q0q0p0q0) & (next(cs) != q0q0p1q0) & (next(cs) != p0q0q0q0) & (next(cs) != p0q0p0q0) & (next(cs) != p0q0p1q0) & (next(cs) != p1q0p0q0)));
+INVAR
+	(((prod1.cs = q0q0q0) & (prod2.cs = q0)) <-> (cs = q0q0q0q0)) &
+	(((prod1.cs = q0q0p0) & (prod2.cs = q0)) <-> (cs = q0q0p0q0)) &
+	(((prod1.cs = q0q0p1) & (prod2.cs = q0)) <-> (cs = q0q0p1q0)) &
+	(((prod1.cs = p0q0q0) & (prod2.cs = q0)) <-> (cs = p0q0q0q0)) &
+	(((prod1.cs = p0q0p0) & (prod2.cs = q0)) <-> (cs = p0q0p0q0)) &
+	(((prod1.cs = p0q0p1) & (prod2.cs = q0)) <-> (cs = p0q0p1q0)) &
+	(((prod1.cs = p1q0q0) & (prod2.cs = q0)) <-> (cs = p1q0q0q0)) &
+	(((prod1.cs = p1q0p0) & (prod2.cs = q0)) <-> (cs = p1q0p0q0)) &
+	(((prod1.cs = p1q0p1) & (prod2.cs = q0)) <-> (cs = p1q0p1q0));
+
+MODULE fifo1sync2fifo3sync4fifo5(time)
+VAR
+	prod1: fifo1sync2fifo3sync4(time);
+	prod2: fifo5(time);
+	ports: portsModule;
+	cs: {q0q0q0q0q0,q0q0q0q0p0,q0q0q0q0p1,q0q0p0q0q0,q0q0p0q0p0,q0q0p0q0p1,q0q0p1q0q0,q0q0p1q0p0,q0q0p1q0p1,p0q0q0q0q0,p0q0q0q0p0,p0q0q0q0p1,p0q0p0q0q0,p0q0p0q0p0,p0q0p0q0p1,p0q0p1q0q0,p0q0p1q0p0,p0q0p1q0p1,p1q0q0q0q0,p1q0q0q0p0,p1q0q0q0p1,p1q0p0q0q0,p1q0p0q0p0,p1q0p0q0p1,p1q0p1q0q0,p1q0p1q0p0,p1q0p1q0p1};
+ASSIGN
+	init(cs) := {q0q0q0q0q0};
+TRANS
+	((cs = q0q0q0q0p0 & ports.e[time] = NULL & ports.b[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.d[time] = NULL & ports.a[time] = 0 & ports.g[time] = 0 & FALSE) -> next(cs) = p0q0q0q0q0) &
+	((cs = q0q0q0q0p0 & ports.e[time] = NULL & ports.b[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.d[time] = NULL & ports.a[time] = 1 & ports.g[time] = 0 & FALSE) -> next(cs) = p1q0q0q0q0) &
+	((cs = q0q0q0q0p1 & ports.e[time] = NULL & ports.b[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.d[time] = NULL & ports.a[time] = 0 & ports.g[time] = 1 & FALSE) -> next(cs) = p0q0q0q0q0) &
+	((cs = q0q0q0q0p1 & ports.e[time] = NULL & ports.b[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.d[time] = NULL & ports.a[time] = 1 & ports.g[time] = 1 & FALSE) -> next(cs) = p1q0q0q0q0) &
+	((cs = q0q0p0q0q0 & ports.e[time] = NULL & ports.b[time] = NULL & ports.g[time] = NULL & ports.d[time] = NULL & ports.a[time] = 0 & ports.f[time] = 0 & ports.f[time] != NULL & ports.f[time] = ports.c[time] & ports.f[time] = 0) -> next(cs) = p0q0q0q0p0) &
+	((cs = q0q0p0q0q0 & ports.e[time] = NULL & ports.b[time] = NULL & ports.g[time] = NULL & ports.d[time] = NULL & ports.a[time] = 0 & ports.f[time] = 0 & ports.f[time] != NULL & ports.f[time] = ports.c[time] & ports.f[time] = 1) -> next(cs) = p0q0q0q0p1) &
+	((cs = q0q0p0q0q0 & ports.e[time] = NULL & ports.b[time] = NULL & ports.g[time] = NULL & ports.d[time] = NULL & ports.a[time] = 1 & ports.f[time] = 0 & ports.f[time] != NULL & ports.f[time] = ports.c[time] & ports.f[time] = 0) -> next(cs) = p1q0q0q0p0) &
+	((cs = q0q0p0q0q0 & ports.e[time] = NULL & ports.b[time] = NULL & ports.g[time] = NULL & ports.d[time] = NULL & ports.a[time] = 1 & ports.f[time] = 0 & ports.f[time] != NULL & ports.f[time] = ports.c[time] & ports.f[time] = 1) -> next(cs) = p1q0q0q0p1) &
+	((cs = q0q0p0q0p0 & ports.e[time] = NULL & ports.b[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.d[time] = NULL & ports.a[time] = 0 & ports.g[time] = 0 & FALSE) -> next(cs) = p0q0p0q0q0) &
+	((cs = q0q0p0q0p0 & ports.e[time] = NULL & ports.b[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.d[time] = NULL & ports.a[time] = 1 & ports.g[time] = 0 & FALSE) -> next(cs) = p1q0p0q0q0) &
+	((cs = q0q0p0q0p1 & ports.e[time] = NULL & ports.b[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.d[time] = NULL & ports.a[time] = 0 & ports.g[time] = 1 & FALSE) -> next(cs) = p0q0p0q0q0) &
+	((cs = q0q0p0q0p1 & ports.e[time] = NULL & ports.b[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.d[time] = NULL & ports.a[time] = 1 & ports.g[time] = 1 & FALSE) -> next(cs) = p1q0p0q0q0) &
+	((cs = q0q0p1q0q0 & ports.e[time] = NULL & ports.b[time] = NULL & ports.g[time] = NULL & ports.d[time] = NULL & ports.a[time] = 0 & ports.f[time] = 1 & ports.f[time] != NULL & ports.f[time] = ports.c[time] & ports.f[time] = 0) -> next(cs) = p0q0q0q0p0) &
+	((cs = q0q0p1q0q0 & ports.e[time] = NULL & ports.b[time] = NULL & ports.g[time] = NULL & ports.d[time] = NULL & ports.a[time] = 0 & ports.f[time] = 1 & ports.f[time] != NULL & ports.f[time] = ports.c[time] & ports.f[time] = 1) -> next(cs) = p0q0q0q0p1) &
+	((cs = q0q0p1q0q0 & ports.e[time] = NULL & ports.b[time] = NULL & ports.g[time] = NULL & ports.d[time] = NULL & ports.a[time] = 1 & ports.f[time] = 1 & ports.f[time] != NULL & ports.f[time] = ports.c[time] & ports.f[time] = 0) -> next(cs) = p1q0q0q0p0) &
+	((cs = q0q0p1q0q0 & ports.e[time] = NULL & ports.b[time] = NULL & ports.g[time] = NULL & ports.d[time] = NULL & ports.a[time] = 1 & ports.f[time] = 1 & ports.f[time] != NULL & ports.f[time] = ports.c[time] & ports.f[time] = 1) -> next(cs) = p1q0q0q0p1) &
+	((cs = q0q0p1q0p0 & ports.e[time] = NULL & ports.b[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.d[time] = NULL & ports.a[time] = 0 & ports.g[time] = 0 & FALSE) -> next(cs) = p0q0p1q0q0) &
+	((cs = q0q0p1q0p0 & ports.e[time] = NULL & ports.b[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.d[time] = NULL & ports.a[time] = 1 & ports.g[time] = 0 & FALSE) -> next(cs) = p1q0p1q0q0) &
+	((cs = q0q0p1q0p1 & ports.e[time] = NULL & ports.b[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.d[time] = NULL & ports.a[time] = 0 & ports.g[time] = 1 & FALSE) -> next(cs) = p0q0p1q0q0) &
+	((cs = q0q0p1q0p1 & ports.e[time] = NULL & ports.b[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.d[time] = NULL & ports.a[time] = 1 & ports.g[time] = 1 & FALSE) -> next(cs) = p1q0p1q0q0) &
+	((cs = p0q0q0q0p0 & ports.a[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.d[time] = NULL & ports.e[time] = 0 & ports.e[time] != NULL & ports.e[time] = ports.b[time] & ports.e[time] = 0 & ports.g[time] = 0 & FALSE) -> next(cs) = q0q0p0q0q0) &
+	((cs = p0q0q0q0p0 & ports.a[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.d[time] = NULL & ports.e[time] = 0 & ports.e[time] != NULL & ports.e[time] = ports.b[time] & ports.e[time] = 1 & ports.g[time] = 0 & FALSE) -> next(cs) = q0q0p1q0q0) &
+	((cs = p0q0q0q0p1 & ports.a[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.d[time] = NULL & ports.e[time] = 0 & ports.e[time] != NULL & ports.e[time] = ports.b[time] & ports.e[time] = 0 & ports.g[time] = 1 & FALSE) -> next(cs) = q0q0p0q0q0) &
+	((cs = p0q0q0q0p1 & ports.a[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.d[time] = NULL & ports.e[time] = 0 & ports.e[time] != NULL & ports.e[time] = ports.b[time] & ports.e[time] = 1 & ports.g[time] = 1 & FALSE) -> next(cs) = q0q0p1q0q0) &
+	((cs = p1q0q0q0p0 & ports.a[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.d[time] = NULL & ports.e[time] = 1 & ports.e[time] != NULL & ports.e[time] = ports.b[time] & ports.e[time] = 0 & ports.g[time] = 0 & FALSE) -> next(cs) = q0q0p0q0q0) &
+	((cs = p1q0q0q0p0 & ports.a[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.d[time] = NULL & ports.e[time] = 1 & ports.e[time] != NULL & ports.e[time] = ports.b[time] & ports.e[time] = 1 & ports.g[time] = 0 & FALSE) -> next(cs) = q0q0p1q0q0) &
+	((cs = p1q0q0q0p1 & ports.a[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.d[time] = NULL & ports.e[time] = 1 & ports.e[time] != NULL & ports.e[time] = ports.b[time] & ports.e[time] = 0 & ports.g[time] = 1 & FALSE) -> next(cs) = q0q0p0q0q0) &
+	((cs = p1q0q0q0p1 & ports.a[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.d[time] = NULL & ports.e[time] = 1 & ports.e[time] != NULL & ports.e[time] = ports.b[time] & ports.e[time] = 1 & ports.g[time] = 1 & FALSE) -> next(cs) = q0q0p1q0q0) &
+	((cs = p1q0p0q0q0 & ports.a[time] = NULL & ports.e[time] = NULL & ports.b[time] = NULL & ports.g[time] = NULL & ports.d[time] = NULL & ports.f[time] = 0 & ports.f[time] != NULL & ports.f[time] = ports.c[time] & ports.f[time] = 0) -> next(cs) = p1q0q0q0p0) &
+	((cs = p1q0p0q0q0 & ports.a[time] = NULL & ports.e[time] = NULL & ports.b[time] = NULL & ports.g[time] = NULL & ports.d[time] = NULL & ports.f[time] = 0 & ports.f[time] != NULL & ports.f[time] = ports.c[time] & ports.f[time] = 1) -> next(cs) = p1q0q0q0p1) &
+	((cs = p1q0p1q0q0 & ports.a[time] = NULL & ports.e[time] = NULL & ports.b[time] = NULL & ports.g[time] = NULL & ports.d[time] = NULL & ports.f[time] = 1 & ports.f[time] != NULL & ports.f[time] = ports.c[time] & ports.f[time] = 0) -> next(cs) = p1q0q0q0p0) &
+	((cs = p1q0p1q0q0 & ports.a[time] = NULL & ports.e[time] = NULL & ports.b[time] = NULL & ports.g[time] = NULL & ports.d[time] = NULL & ports.f[time] = 1 & ports.f[time] != NULL & ports.f[time] = ports.c[time] & ports.f[time] = 1) -> next(cs) = p1q0q0q0p1) &
+	((cs = p1q0p1q0p0 & ports.a[time] = NULL & ports.e[time] = NULL & ports.b[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.d[time] = NULL & ports.g[time] = 0 & FALSE) -> next(cs) = p1q0p1q0q0) &
+	((cs = p1q0p1q0p1 & ports.a[time] = NULL & ports.e[time] = NULL & ports.b[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.d[time] = NULL & ports.g[time] = 1 & FALSE) -> next(cs) = p1q0p1q0q0) &
+	((cs = q0q0q0q0q0) -> ((next(cs) != q0q0q0q0p0) & (next(cs) != q0q0q0q0p1) & (next(cs) != q0q0p0q0q0) & (next(cs) != q0q0p0q0p0) & (next(cs) != q0q0p0q0p1) & (next(cs) != q0q0p1q0q0) & (next(cs) != q0q0p1q0p0) & (next(cs) != q0q0p1q0p1) & (next(cs) != p0q0q0q0p0) & (next(cs) != p0q0q0q0p1) & (next(cs) != p0q0p0q0q0) & (next(cs) != p0q0p0q0p0) & (next(cs) != p0q0p0q0p1) & (next(cs) != p0q0p1q0q0) & (next(cs) != p0q0p1q0p0) & (next(cs) != p0q0p1q0p1) & (next(cs) != p1q0q0q0p0) & (next(cs) != p1q0q0q0p1) & (next(cs) != p1q0p0q0q0) & (next(cs) != p1q0p0q0p0) & (next(cs) != p1q0p0q0p1) & (next(cs) != p1q0p1q0q0) & (next(cs) != p1q0p1q0p0) & (next(cs) != p1q0p1q0p1))) &
+	((cs = q0q0q0q0p0) -> ((next(cs) != q0q0q0q0q0) & (next(cs) != q0q0q0q0p1) & (next(cs) != q0q0p0q0q0) & (next(cs) != q0q0p0q0p0) & (next(cs) != q0q0p0q0p1) & (next(cs) != q0q0p1q0q0) & (next(cs) != q0q0p1q0p0) & (next(cs) != q0q0p1q0p1) & (next(cs) != p0q0q0q0p1) & (next(cs) != p0q0p0q0q0) & (next(cs) != p0q0p0q0p0) & (next(cs) != p0q0p0q0p1) & (next(cs) != p0q0p1q0q0) & (next(cs) != p0q0p1q0p0) & (next(cs) != p0q0p1q0p1) & (next(cs) != p1q0q0q0p1) & (next(cs) != p1q0p0q0q0) & (next(cs) != p1q0p0q0p0) & (next(cs) != p1q0p0q0p1) & (next(cs) != p1q0p1q0q0) & (next(cs) != p1q0p1q0p0) & (next(cs) != p1q0p1q0p1))) &
+	((cs = q0q0q0q0p1) -> ((next(cs) != q0q0q0q0q0) & (next(cs) != q0q0q0q0p0) & (next(cs) != q0q0p0q0q0) & (next(cs) != q0q0p0q0p0) & (next(cs) != q0q0p0q0p1) & (next(cs) != q0q0p1q0q0) & (next(cs) != q0q0p1q0p0) & (next(cs) != q0q0p1q0p1) & (next(cs) != p0q0q0q0p0) & (next(cs) != p0q0p0q0q0) & (next(cs) != p0q0p0q0p0) & (next(cs) != p0q0p0q0p1) & (next(cs) != p0q0p1q0q0) & (next(cs) != p0q0p1q0p0) & (next(cs) != p0q0p1q0p1) & (next(cs) != p1q0q0q0p0) & (next(cs) != p1q0p0q0q0) & (next(cs) != p1q0p0q0p0) & (next(cs) != p1q0p0q0p1) & (next(cs) != p1q0p1q0q0) & (next(cs) != p1q0p1q0p0) & (next(cs) != p1q0p1q0p1))) &
+	((cs = q0q0p0q0q0) -> ((next(cs) != q0q0q0q0q0) & (next(cs) != q0q0q0q0p0) & (next(cs) != q0q0q0q0p1) & (next(cs) != q0q0p0q0p0) & (next(cs) != q0q0p0q0p1) & (next(cs) != q0q0p1q0q0) & (next(cs) != q0q0p1q0p0) & (next(cs) != q0q0p1q0p1) & (next(cs) != p0q0q0q0q0) & (next(cs) != p0q0p0q0p0) & (next(cs) != p0q0p0q0p1) & (next(cs) != p0q0p1q0q0) & (next(cs) != p0q0p1q0p0) & (next(cs) != p0q0p1q0p1) & (next(cs) != p1q0q0q0q0) & (next(cs) != p1q0p0q0p0) & (next(cs) != p1q0p0q0p1) & (next(cs) != p1q0p1q0q0) & (next(cs) != p1q0p1q0p0) & (next(cs) != p1q0p1q0p1))) &
+	((cs = q0q0p0q0p0) -> ((next(cs) != q0q0q0q0q0) & (next(cs) != q0q0q0q0p0) & (next(cs) != q0q0q0q0p1) & (next(cs) != q0q0p0q0q0) & (next(cs) != q0q0p0q0p1) & (next(cs) != q0q0p1q0q0) & (next(cs) != q0q0p1q0p0) & (next(cs) != q0q0p1q0p1) & (next(cs) != p0q0q0q0q0) & (next(cs) != p0q0q0q0p0) & (next(cs) != p0q0q0q0p1) & (next(cs) != p0q0p0q0p1) & (next(cs) != p0q0p1q0q0) & (next(cs) != p0q0p1q0p0) & (next(cs) != p0q0p1q0p1) & (next(cs) != p1q0q0q0q0) & (next(cs) != p1q0q0q0p0) & (next(cs) != p1q0q0q0p1) & (next(cs) != p1q0p0q0p1) & (next(cs) != p1q0p1q0q0) & (next(cs) != p1q0p1q0p0) & (next(cs) != p1q0p1q0p1))) &
+	((cs = q0q0p0q0p1) -> ((next(cs) != q0q0q0q0q0) & (next(cs) != q0q0q0q0p0) & (next(cs) != q0q0q0q0p1) & (next(cs) != q0q0p0q0q0) & (next(cs) != q0q0p0q0p0) & (next(cs) != q0q0p1q0q0) & (next(cs) != q0q0p1q0p0) & (next(cs) != q0q0p1q0p1) & (next(cs) != p0q0q0q0q0) & (next(cs) != p0q0q0q0p0) & (next(cs) != p0q0q0q0p1) & (next(cs) != p0q0p0q0p0) & (next(cs) != p0q0p1q0q0) & (next(cs) != p0q0p1q0p0) & (next(cs) != p0q0p1q0p1) & (next(cs) != p1q0q0q0q0) & (next(cs) != p1q0q0q0p0) & (next(cs) != p1q0q0q0p1) & (next(cs) != p1q0p0q0p0) & (next(cs) != p1q0p1q0q0) & (next(cs) != p1q0p1q0p0) & (next(cs) != p1q0p1q0p1))) &
+	((cs = q0q0p1q0q0) -> ((next(cs) != q0q0q0q0q0) & (next(cs) != q0q0q0q0p0) & (next(cs) != q0q0q0q0p1) & (next(cs) != q0q0p0q0q0) & (next(cs) != q0q0p0q0p0) & (next(cs) != q0q0p0q0p1) & (next(cs) != q0q0p1q0p0) & (next(cs) != q0q0p1q0p1) & (next(cs) != p0q0q0q0q0) & (next(cs) != p0q0p0q0q0) & (next(cs) != p0q0p0q0p0) & (next(cs) != p0q0p0q0p1) & (next(cs) != p0q0p1q0p0) & (next(cs) != p0q0p1q0p1) & (next(cs) != p1q0q0q0q0) & (next(cs) != p1q0p0q0q0) & (next(cs) != p1q0p0q0p0) & (next(cs) != p1q0p0q0p1) & (next(cs) != p1q0p1q0p0) & (next(cs) != p1q0p1q0p1))) &
+	((cs = q0q0p1q0p0) -> ((next(cs) != q0q0q0q0q0) & (next(cs) != q0q0q0q0p0) & (next(cs) != q0q0q0q0p1) & (next(cs) != q0q0p0q0q0) & (next(cs) != q0q0p0q0p0) & (next(cs) != q0q0p0q0p1) & (next(cs) != q0q0p1q0q0) & (next(cs) != q0q0p1q0p1) & (next(cs) != p0q0q0q0q0) & (next(cs) != p0q0q0q0p0) & (next(cs) != p0q0q0q0p1) & (next(cs) != p0q0p0q0q0) & (next(cs) != p0q0p0q0p0) & (next(cs) != p0q0p0q0p1) & (next(cs) != p0q0p1q0p1) & (next(cs) != p1q0q0q0q0) & (next(cs) != p1q0q0q0p0) & (next(cs) != p1q0q0q0p1) & (next(cs) != p1q0p0q0q0) & (next(cs) != p1q0p0q0p0) & (next(cs) != p1q0p0q0p1) & (next(cs) != p1q0p1q0p1))) &
+	((cs = q0q0p1q0p1) -> ((next(cs) != q0q0q0q0q0) & (next(cs) != q0q0q0q0p0) & (next(cs) != q0q0q0q0p1) & (next(cs) != q0q0p0q0q0) & (next(cs) != q0q0p0q0p0) & (next(cs) != q0q0p0q0p1) & (next(cs) != q0q0p1q0q0) & (next(cs) != q0q0p1q0p0) & (next(cs) != p0q0q0q0q0) & (next(cs) != p0q0q0q0p0) & (next(cs) != p0q0q0q0p1) & (next(cs) != p0q0p0q0q0) & (next(cs) != p0q0p0q0p0) & (next(cs) != p0q0p0q0p1) & (next(cs) != p0q0p1q0p0) & (next(cs) != p1q0q0q0q0) & (next(cs) != p1q0q0q0p0) & (next(cs) != p1q0q0q0p1) & (next(cs) != p1q0p0q0q0) & (next(cs) != p1q0p0q0p0) & (next(cs) != p1q0p0q0p1) & (next(cs) != p1q0p1q0p0))) &
+	((cs = p0q0q0q0q0) -> ((next(cs) != q0q0q0q0q0) & (next(cs) != q0q0q0q0p0) & (next(cs) != q0q0q0q0p1) & (next(cs) != q0q0p0q0p0) & (next(cs) != q0q0p0q0p1) & (next(cs) != q0q0p1q0p0) & (next(cs) != q0q0p1q0p1) & (next(cs) != p0q0q0q0p0) & (next(cs) != p0q0q0q0p1) & (next(cs) != p0q0p0q0q0) & (next(cs) != p0q0p0q0p0) & (next(cs) != p0q0p0q0p1) & (next(cs) != p0q0p1q0q0) & (next(cs) != p0q0p1q0p0) & (next(cs) != p0q0p1q0p1) & (next(cs) != p1q0q0q0q0) & (next(cs) != p1q0q0q0p0) & (next(cs) != p1q0q0q0p1) & (next(cs) != p1q0p0q0q0) & (next(cs) != p1q0p0q0p0) & (next(cs) != p1q0p0q0p1) & (next(cs) != p1q0p1q0q0) & (next(cs) != p1q0p1q0p0) & (next(cs) != p1q0p1q0p1))) &
+	((cs = p0q0q0q0p0) -> ((next(cs) != q0q0q0q0q0) & (next(cs) != q0q0q0q0p0) & (next(cs) != q0q0q0q0p1) & (next(cs) != q0q0p0q0p1) & (next(cs) != q0q0p1q0p1) & (next(cs) != p0q0q0q0q0) & (next(cs) != p0q0q0q0p1) & (next(cs) != p0q0p0q0q0) & (next(cs) != p0q0p0q0p0) & (next(cs) != p0q0p0q0p1) & (next(cs) != p0q0p1q0q0) & (next(cs) != p0q0p1q0p0) & (next(cs) != p0q0p1q0p1) & (next(cs) != p1q0q0q0q0) & (next(cs) != p1q0q0q0p0) & (next(cs) != p1q0q0q0p1) & (next(cs) != p1q0p0q0q0) & (next(cs) != p1q0p0q0p0) & (next(cs) != p1q0p0q0p1) & (next(cs) != p1q0p1q0q0) & (next(cs) != p1q0p1q0p0) & (next(cs) != p1q0p1q0p1))) &
+	((cs = p0q0q0q0p1) -> ((next(cs) != q0q0q0q0q0) & (next(cs) != q0q0q0q0p0) & (next(cs) != q0q0q0q0p1) & (next(cs) != q0q0p0q0p0) & (next(cs) != q0q0p1q0p0) & (next(cs) != p0q0q0q0q0) & (next(cs) != p0q0q0q0p0) & (next(cs) != p0q0p0q0q0) & (next(cs) != p0q0p0q0p0) & (next(cs) != p0q0p0q0p1) & (next(cs) != p0q0p1q0q0) & (next(cs) != p0q0p1q0p0) & (next(cs) != p0q0p1q0p1) & (next(cs) != p1q0q0q0q0) & (next(cs) != p1q0q0q0p0) & (next(cs) != p1q0q0q0p1) & (next(cs) != p1q0p0q0q0) & (next(cs) != p1q0p0q0p0) & (next(cs) != p1q0p0q0p1) & (next(cs) != p1q0p1q0q0) & (next(cs) != p1q0p1q0p0) & (next(cs) != p1q0p1q0p1))) &
+	((cs = p0q0p0q0q0) -> ((next(cs) != q0q0q0q0q0) & (next(cs) != q0q0q0q0p0) & (next(cs) != q0q0q0q0p1) & (next(cs) != q0q0p0q0q0) & (next(cs) != q0q0p0q0p0) & (next(cs) != q0q0p0q0p1) & (next(cs) != q0q0p1q0q0) & (next(cs) != q0q0p1q0p0) & (next(cs) != q0q0p1q0p1) & (next(cs) != p0q0q0q0q0) & (next(cs) != p0q0q0q0p0) & (next(cs) != p0q0q0q0p1) & (next(cs) != p0q0p0q0p0) & (next(cs) != p0q0p0q0p1) & (next(cs) != p0q0p1q0q0) & (next(cs) != p0q0p1q0p0) & (next(cs) != p0q0p1q0p1) & (next(cs) != p1q0q0q0q0) & (next(cs) != p1q0q0q0p0) & (next(cs) != p1q0q0q0p1) & (next(cs) != p1q0p0q0q0) & (next(cs) != p1q0p0q0p0) & (next(cs) != p1q0p0q0p1) & (next(cs) != p1q0p1q0q0) & (next(cs) != p1q0p1q0p0) & (next(cs) != p1q0p1q0p1))) &
+	((cs = p0q0p0q0p0) -> ((next(cs) != q0q0q0q0q0) & (next(cs) != q0q0q0q0p0) & (next(cs) != q0q0q0q0p1) & (next(cs) != q0q0p0q0q0) & (next(cs) != q0q0p0q0p0) & (next(cs) != q0q0p0q0p1) & (next(cs) != q0q0p1q0q0) & (next(cs) != q0q0p1q0p0) & (next(cs) != q0q0p1q0p1) & (next(cs) != p0q0q0q0q0) & (next(cs) != p0q0q0q0p0) & (next(cs) != p0q0q0q0p1) & (next(cs) != p0q0p0q0q0) & (next(cs) != p0q0p0q0p1) & (next(cs) != p0q0p1q0q0) & (next(cs) != p0q0p1q0p0) & (next(cs) != p0q0p1q0p1) & (next(cs) != p1q0q0q0q0) & (next(cs) != p1q0q0q0p0) & (next(cs) != p1q0q0q0p1) & (next(cs) != p1q0p0q0q0) & (next(cs) != p1q0p0q0p0) & (next(cs) != p1q0p0q0p1) & (next(cs) != p1q0p1q0q0) & (next(cs) != p1q0p1q0p0) & (next(cs) != p1q0p1q0p1))) &
+	((cs = p0q0p0q0p1) -> ((next(cs) != q0q0q0q0q0) & (next(cs) != q0q0q0q0p0) & (next(cs) != q0q0q0q0p1) & (next(cs) != q0q0p0q0q0) & (next(cs) != q0q0p0q0p0) & (next(cs) != q0q0p0q0p1) & (next(cs) != q0q0p1q0q0) & (next(cs) != q0q0p1q0p0) & (next(cs) != q0q0p1q0p1) & (next(cs) != p0q0q0q0q0) & (next(cs) != p0q0q0q0p0) & (next(cs) != p0q0q0q0p1) & (next(cs) != p0q0p0q0q0) & (next(cs) != p0q0p0q0p0) & (next(cs) != p0q0p1q0q0) & (next(cs) != p0q0p1q0p0) & (next(cs) != p0q0p1q0p1) & (next(cs) != p1q0q0q0q0) & (next(cs) != p1q0q0q0p0) & (next(cs) != p1q0q0q0p1) & (next(cs) != p1q0p0q0q0) & (next(cs) != p1q0p0q0p0) & (next(cs) != p1q0p0q0p1) & (next(cs) != p1q0p1q0q0) & (next(cs) != p1q0p1q0p0) & (next(cs) != p1q0p1q0p1))) &
+	((cs = p0q0p1q0q0) -> ((next(cs) != q0q0q0q0q0) & (next(cs) != q0q0q0q0p0) & (next(cs) != q0q0q0q0p1) & (next(cs) != q0q0p0q0q0) & (next(cs) != q0q0p0q0p0) & (next(cs) != q0q0p0q0p1) & (next(cs) != q0q0p1q0q0) & (next(cs) != q0q0p1q0p0) & (next(cs) != q0q0p1q0p1) & (next(cs) != p0q0q0q0q0) & (next(cs) != p0q0q0q0p0) & (next(cs) != p0q0q0q0p1) & (next(cs) != p0q0p0q0q0) & (next(cs) != p0q0p0q0p0) & (next(cs) != p0q0p0q0p1) & (next(cs) != p0q0p1q0p0) & (next(cs) != p0q0p1q0p1) & (next(cs) != p1q0q0q0q0) & (next(cs) != p1q0q0q0p0) & (next(cs) != p1q0q0q0p1) & (next(cs) != p1q0p0q0q0) & (next(cs) != p1q0p0q0p0) & (next(cs) != p1q0p0q0p1) & (next(cs) != p1q0p1q0q0) & (next(cs) != p1q0p1q0p0) & (next(cs) != p1q0p1q0p1))) &
+	((cs = p0q0p1q0p0) -> ((next(cs) != q0q0q0q0q0) & (next(cs) != q0q0q0q0p0) & (next(cs) != q0q0q0q0p1) & (next(cs) != q0q0p0q0q0) & (next(cs) != q0q0p0q0p0) & (next(cs) != q0q0p0q0p1) & (next(cs) != q0q0p1q0q0) & (next(cs) != q0q0p1q0p0) & (next(cs) != q0q0p1q0p1) & (next(cs) != p0q0q0q0q0) & (next(cs) != p0q0q0q0p0) & (next(cs) != p0q0q0q0p1) & (next(cs) != p0q0p0q0q0) & (next(cs) != p0q0p0q0p0) & (next(cs) != p0q0p0q0p1) & (next(cs) != p0q0p1q0q0) & (next(cs) != p0q0p1q0p1) & (next(cs) != p1q0q0q0q0) & (next(cs) != p1q0q0q0p0) & (next(cs) != p1q0q0q0p1) & (next(cs) != p1q0p0q0q0) & (next(cs) != p1q0p0q0p0) & (next(cs) != p1q0p0q0p1) & (next(cs) != p1q0p1q0q0) & (next(cs) != p1q0p1q0p0) & (next(cs) != p1q0p1q0p1))) &
+	((cs = p0q0p1q0p1) -> ((next(cs) != q0q0q0q0q0) & (next(cs) != q0q0q0q0p0) & (next(cs) != q0q0q0q0p1) & (next(cs) != q0q0p0q0q0) & (next(cs) != q0q0p0q0p0) & (next(cs) != q0q0p0q0p1) & (next(cs) != q0q0p1q0q0) & (next(cs) != q0q0p1q0p0) & (next(cs) != q0q0p1q0p1) & (next(cs) != p0q0q0q0q0) & (next(cs) != p0q0q0q0p0) & (next(cs) != p0q0q0q0p1) & (next(cs) != p0q0p0q0q0) & (next(cs) != p0q0p0q0p0) & (next(cs) != p0q0p0q0p1) & (next(cs) != p0q0p1q0q0) & (next(cs) != p0q0p1q0p0) & (next(cs) != p1q0q0q0q0) & (next(cs) != p1q0q0q0p0) & (next(cs) != p1q0q0q0p1) & (next(cs) != p1q0p0q0q0) & (next(cs) != p1q0p0q0p0) & (next(cs) != p1q0p0q0p1) & (next(cs) != p1q0p1q0q0) & (next(cs) != p1q0p1q0p0) & (next(cs) != p1q0p1q0p1))) &
+	((cs = p1q0q0q0q0) -> ((next(cs) != q0q0q0q0q0) & (next(cs) != q0q0q0q0p0) & (next(cs) != q0q0q0q0p1) & (next(cs) != q0q0p0q0p0) & (next(cs) != q0q0p0q0p1) & (next(cs) != q0q0p1q0p0) & (next(cs) != q0q0p1q0p1) & (next(cs) != p0q0q0q0q0) & (next(cs) != p0q0q0q0p0) & (next(cs) != p0q0q0q0p1) & (next(cs) != p0q0p0q0q0) & (next(cs) != p0q0p0q0p0) & (next(cs) != p0q0p0q0p1) & (next(cs) != p0q0p1q0q0) & (next(cs) != p0q0p1q0p0) & (next(cs) != p0q0p1q0p1) & (next(cs) != p1q0q0q0p0) & (next(cs) != p1q0q0q0p1) & (next(cs) != p1q0p0q0q0) & (next(cs) != p1q0p0q0p0) & (next(cs) != p1q0p0q0p1) & (next(cs) != p1q0p1q0q0) & (next(cs) != p1q0p1q0p0) & (next(cs) != p1q0p1q0p1))) &
+	((cs = p1q0q0q0p0) -> ((next(cs) != q0q0q0q0q0) & (next(cs) != q0q0q0q0p0) & (next(cs) != q0q0q0q0p1) & (next(cs) != q0q0p0q0p1) & (next(cs) != q0q0p1q0p1) & (next(cs) != p0q0q0q0q0) & (next(cs) != p0q0q0q0p0) & (next(cs) != p0q0q0q0p1) & (next(cs) != p0q0p0q0q0) & (next(cs) != p0q0p0q0p0) & (next(cs) != p0q0p0q0p1) & (next(cs) != p0q0p1q0q0) & (next(cs) != p0q0p1q0p0) & (next(cs) != p0q0p1q0p1) & (next(cs) != p1q0q0q0q0) & (next(cs) != p1q0q0q0p1) & (next(cs) != p1q0p0q0q0) & (next(cs) != p1q0p0q0p0) & (next(cs) != p1q0p0q0p1) & (next(cs) != p1q0p1q0q0) & (next(cs) != p1q0p1q0p0) & (next(cs) != p1q0p1q0p1))) &
+	((cs = p1q0q0q0p1) -> ((next(cs) != q0q0q0q0q0) & (next(cs) != q0q0q0q0p0) & (next(cs) != q0q0q0q0p1) & (next(cs) != q0q0p0q0p0) & (next(cs) != q0q0p1q0p0) & (next(cs) != p0q0q0q0q0) & (next(cs) != p0q0q0q0p0) & (next(cs) != p0q0q0q0p1) & (next(cs) != p0q0p0q0q0) & (next(cs) != p0q0p0q0p0) & (next(cs) != p0q0p0q0p1) & (next(cs) != p0q0p1q0q0) & (next(cs) != p0q0p1q0p0) & (next(cs) != p0q0p1q0p1) & (next(cs) != p1q0q0q0q0) & (next(cs) != p1q0q0q0p0) & (next(cs) != p1q0p0q0q0) & (next(cs) != p1q0p0q0p0) & (next(cs) != p1q0p0q0p1) & (next(cs) != p1q0p1q0q0) & (next(cs) != p1q0p1q0p0) & (next(cs) != p1q0p1q0p1))) &
+	((cs = p1q0p0q0q0) -> ((next(cs) != q0q0q0q0q0) & (next(cs) != q0q0q0q0p0) & (next(cs) != q0q0q0q0p1) & (next(cs) != q0q0p0q0q0) & (next(cs) != q0q0p0q0p0) & (next(cs) != q0q0p0q0p1) & (next(cs) != q0q0p1q0q0) & (next(cs) != q0q0p1q0p0) & (next(cs) != q0q0p1q0p1) & (next(cs) != p0q0q0q0q0) & (next(cs) != p0q0q0q0p0) & (next(cs) != p0q0q0q0p1) & (next(cs) != p0q0p0q0q0) & (next(cs) != p0q0p0q0p0) & (next(cs) != p0q0p0q0p1) & (next(cs) != p0q0p1q0q0) & (next(cs) != p0q0p1q0p0) & (next(cs) != p0q0p1q0p1) & (next(cs) != p1q0q0q0q0) & (next(cs) != p1q0p0q0p0) & (next(cs) != p1q0p0q0p1) & (next(cs) != p1q0p1q0q0) & (next(cs) != p1q0p1q0p0) & (next(cs) != p1q0p1q0p1))) &
+	((cs = p1q0p0q0p0) -> ((next(cs) != q0q0q0q0q0) & (next(cs) != q0q0q0q0p0) & (next(cs) != q0q0q0q0p1) & (next(cs) != q0q0p0q0q0) & (next(cs) != q0q0p0q0p0) & (next(cs) != q0q0p0q0p1) & (next(cs) != q0q0p1q0q0) & (next(cs) != q0q0p1q0p0) & (next(cs) != q0q0p1q0p1) & (next(cs) != p0q0q0q0q0) & (next(cs) != p0q0q0q0p0) & (next(cs) != p0q0q0q0p1) & (next(cs) != p0q0p0q0q0) & (next(cs) != p0q0p0q0p0) & (next(cs) != p0q0p0q0p1) & (next(cs) != p0q0p1q0q0) & (next(cs) != p0q0p1q0p0) & (next(cs) != p0q0p1q0p1) & (next(cs) != p1q0q0q0q0) & (next(cs) != p1q0q0q0p0) & (next(cs) != p1q0q0q0p1) & (next(cs) != p1q0p0q0q0) & (next(cs) != p1q0p0q0p1) & (next(cs) != p1q0p1q0q0) & (next(cs) != p1q0p1q0p0) & (next(cs) != p1q0p1q0p1))) &
+	((cs = p1q0p0q0p1) -> ((next(cs) != q0q0q0q0q0) & (next(cs) != q0q0q0q0p0) & (next(cs) != q0q0q0q0p1) & (next(cs) != q0q0p0q0q0) & (next(cs) != q0q0p0q0p0) & (next(cs) != q0q0p0q0p1) & (next(cs) != q0q0p1q0q0) & (next(cs) != q0q0p1q0p0) & (next(cs) != q0q0p1q0p1) & (next(cs) != p0q0q0q0q0) & (next(cs) != p0q0q0q0p0) & (next(cs) != p0q0q0q0p1) & (next(cs) != p0q0p0q0q0) & (next(cs) != p0q0p0q0p0) & (next(cs) != p0q0p0q0p1) & (next(cs) != p0q0p1q0q0) & (next(cs) != p0q0p1q0p0) & (next(cs) != p0q0p1q0p1) & (next(cs) != p1q0q0q0q0) & (next(cs) != p1q0q0q0p0) & (next(cs) != p1q0q0q0p1) & (next(cs) != p1q0p0q0q0) & (next(cs) != p1q0p0q0p0) & (next(cs) != p1q0p1q0q0) & (next(cs) != p1q0p1q0p0) & (next(cs) != p1q0p1q0p1))) &
+	((cs = p1q0p1q0q0) -> ((next(cs) != q0q0q0q0q0) & (next(cs) != q0q0q0q0p0) & (next(cs) != q0q0q0q0p1) & (next(cs) != q0q0p0q0q0) & (next(cs) != q0q0p0q0p0) & (next(cs) != q0q0p0q0p1) & (next(cs) != q0q0p1q0q0) & (next(cs) != q0q0p1q0p0) & (next(cs) != q0q0p1q0p1) & (next(cs) != p0q0q0q0q0) & (next(cs) != p0q0q0q0p0) & (next(cs) != p0q0q0q0p1) & (next(cs) != p0q0p0q0q0) & (next(cs) != p0q0p0q0p0) & (next(cs) != p0q0p0q0p1) & (next(cs) != p0q0p1q0q0) & (next(cs) != p0q0p1q0p0) & (next(cs) != p0q0p1q0p1) & (next(cs) != p1q0q0q0q0) & (next(cs) != p1q0p0q0q0) & (next(cs) != p1q0p0q0p0) & (next(cs) != p1q0p0q0p1) & (next(cs) != p1q0p1q0p0) & (next(cs) != p1q0p1q0p1))) &
+	((cs = p1q0p1q0p0) -> ((next(cs) != q0q0q0q0q0) & (next(cs) != q0q0q0q0p0) & (next(cs) != q0q0q0q0p1) & (next(cs) != q0q0p0q0q0) & (next(cs) != q0q0p0q0p0) & (next(cs) != q0q0p0q0p1) & (next(cs) != q0q0p1q0q0) & (next(cs) != q0q0p1q0p0) & (next(cs) != q0q0p1q0p1) & (next(cs) != p0q0q0q0q0) & (next(cs) != p0q0q0q0p0) & (next(cs) != p0q0q0q0p1) & (next(cs) != p0q0p0q0q0) & (next(cs) != p0q0p0q0p0) & (next(cs) != p0q0p0q0p1) & (next(cs) != p0q0p1q0q0) & (next(cs) != p0q0p1q0p0) & (next(cs) != p0q0p1q0p1) & (next(cs) != p1q0q0q0q0) & (next(cs) != p1q0q0q0p0) & (next(cs) != p1q0q0q0p1) & (next(cs) != p1q0p0q0q0) & (next(cs) != p1q0p0q0p0) & (next(cs) != p1q0p0q0p1) & (next(cs) != p1q0p1q0p1))) &
+	((cs = p1q0p1q0p1) -> ((next(cs) != q0q0q0q0q0) & (next(cs) != q0q0q0q0p0) & (next(cs) != q0q0q0q0p1) & (next(cs) != q0q0p0q0q0) & (next(cs) != q0q0p0q0p0) & (next(cs) != q0q0p0q0p1) & (next(cs) != q0q0p1q0q0) & (next(cs) != q0q0p1q0p0) & (next(cs) != q0q0p1q0p1) & (next(cs) != p0q0q0q0q0) & (next(cs) != p0q0q0q0p0) & (next(cs) != p0q0q0q0p1) & (next(cs) != p0q0p0q0q0) & (next(cs) != p0q0p0q0p0) & (next(cs) != p0q0p0q0p1) & (next(cs) != p0q0p1q0q0) & (next(cs) != p0q0p1q0p0) & (next(cs) != p0q0p1q0p1) & (next(cs) != p1q0q0q0q0) & (next(cs) != p1q0q0q0p0) & (next(cs) != p1q0q0q0p1) & (next(cs) != p1q0p0q0q0) & (next(cs) != p1q0p0q0p0) & (next(cs) != p1q0p0q0p1) & (next(cs) != p1q0p1q0p0)));
+INVAR
+	(((prod1.cs = q0q0q0q0) & (prod2.cs = q0)) <-> (cs = q0q0q0q0q0)) &
+	(((prod1.cs = q0q0q0q0) & (prod2.cs = p0)) <-> (cs = q0q0q0q0p0)) &
+	(((prod1.cs = q0q0q0q0) & (prod2.cs = p1)) <-> (cs = q0q0q0q0p1)) &
+	(((prod1.cs = q0q0p0q0) & (prod2.cs = q0)) <-> (cs = q0q0p0q0q0)) &
+	(((prod1.cs = q0q0p0q0) & (prod2.cs = p0)) <-> (cs = q0q0p0q0p0)) &
+	(((prod1.cs = q0q0p0q0) & (prod2.cs = p1)) <-> (cs = q0q0p0q0p1)) &
+	(((prod1.cs = q0q0p1q0) & (prod2.cs = q0)) <-> (cs = q0q0p1q0q0)) &
+	(((prod1.cs = q0q0p1q0) & (prod2.cs = p0)) <-> (cs = q0q0p1q0p0)) &
+	(((prod1.cs = q0q0p1q0) & (prod2.cs = p1)) <-> (cs = q0q0p1q0p1)) &
+	(((prod1.cs = p0q0q0q0) & (prod2.cs = q0)) <-> (cs = p0q0q0q0q0)) &
+	(((prod1.cs = p0q0q0q0) & (prod2.cs = p0)) <-> (cs = p0q0q0q0p0)) &
+	(((prod1.cs = p0q0q0q0) & (prod2.cs = p1)) <-> (cs = p0q0q0q0p1)) &
+	(((prod1.cs = p0q0p0q0) & (prod2.cs = q0)) <-> (cs = p0q0p0q0q0)) &
+	(((prod1.cs = p0q0p0q0) & (prod2.cs = p0)) <-> (cs = p0q0p0q0p0)) &
+	(((prod1.cs = p0q0p0q0) & (prod2.cs = p1)) <-> (cs = p0q0p0q0p1)) &
+	(((prod1.cs = p0q0p1q0) & (prod2.cs = q0)) <-> (cs = p0q0p1q0q0)) &
+	(((prod1.cs = p0q0p1q0) & (prod2.cs = p0)) <-> (cs = p0q0p1q0p0)) &
+	(((prod1.cs = p0q0p1q0) & (prod2.cs = p1)) <-> (cs = p0q0p1q0p1)) &
+	(((prod1.cs = p1q0q0q0) & (prod2.cs = q0)) <-> (cs = p1q0q0q0q0)) &
+	(((prod1.cs = p1q0q0q0) & (prod2.cs = p0)) <-> (cs = p1q0q0q0p0)) &
+	(((prod1.cs = p1q0q0q0) & (prod2.cs = p1)) <-> (cs = p1q0q0q0p1)) &
+	(((prod1.cs = p1q0p0q0) & (prod2.cs = q0)) <-> (cs = p1q0p0q0q0)) &
+	(((prod1.cs = p1q0p0q0) & (prod2.cs = p0)) <-> (cs = p1q0p0q0p0)) &
+	(((prod1.cs = p1q0p0q0) & (prod2.cs = p1)) <-> (cs = p1q0p0q0p1)) &
+	(((prod1.cs = p1q0p1q0) & (prod2.cs = q0)) <-> (cs = p1q0p1q0q0)) &
+	(((prod1.cs = p1q0p1q0) & (prod2.cs = p0)) <-> (cs = p1q0p1q0p0)) &
+	(((prod1.cs = p1q0p1q0) & (prod2.cs = p1)) <-> (cs = p1q0p1q0p1));
+
+MODULE finalAutomata(time)
+VAR
+	prod1: fifo1sync2fifo3sync4fifo5(time);
+	prod2: sync6(time);
+	ports: portsModule;
+	cs: {q0q0q0q0q0q0,q0q0q0q0p0q0,q0q0q0q0p1q0,q0q0p0q0q0q0,q0q0p0q0p0q0,q0q0p0q0p1q0,q0q0p1q0q0q0,q0q0p1q0p0q0,q0q0p1q0p1q0,p0q0q0q0q0q0,p0q0q0q0p0q0,p0q0q0q0p1q0,p0q0p0q0q0q0,p0q0p0q0p0q0,p0q0p0q0p1q0,p0q0p1q0q0q0,p0q0p1q0p0q0,p0q0p1q0p1q0,p1q0q0q0q0q0,p1q0q0q0p0q0,p1q0q0q0p1q0,p1q0p0q0q0q0,p1q0p0q0p0q0,p1q0p0q0p1q0,p1q0p1q0q0q0,p1q0p1q0p0q0,p1q0p1q0p1q0};
+ASSIGN
+	init(cs) := {q0q0q0q0q0q0};
+TRANS
+	((cs = q0q0q0q0p0q0 & ports.e[time] = NULL & ports.b[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.a[time] = 0 & ports.g[time] = 0 & ports.g[time] != NULL & ports.g[time] = ports.d[time]) -> next(cs) = p0q0q0q0q0q0) &
+	((cs = q0q0q0q0p0q0 & ports.e[time] = NULL & ports.b[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.a[time] = 1 & ports.g[time] = 0 & ports.g[time] != NULL & ports.g[time] = ports.d[time]) -> next(cs) = p1q0q0q0q0q0) &
+	((cs = q0q0q0q0p1q0 & ports.e[time] = NULL & ports.b[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.a[time] = 0 & ports.g[time] = 1 & ports.g[time] != NULL & ports.g[time] = ports.d[time]) -> next(cs) = p0q0q0q0q0q0) &
+	((cs = q0q0q0q0p1q0 & ports.e[time] = NULL & ports.b[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.a[time] = 1 & ports.g[time] = 1 & ports.g[time] != NULL & ports.g[time] = ports.d[time]) -> next(cs) = p1q0q0q0q0q0) &
+	((cs = q0q0p0q0p0q0 & ports.e[time] = NULL & ports.b[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.a[time] = 0 & ports.g[time] = 0 & ports.g[time] != NULL & ports.g[time] = ports.d[time]) -> next(cs) = p0q0p0q0q0q0) &
+	((cs = q0q0p0q0p0q0 & ports.e[time] = NULL & ports.b[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.a[time] = 1 & ports.g[time] = 0 & ports.g[time] != NULL & ports.g[time] = ports.d[time]) -> next(cs) = p1q0p0q0q0q0) &
+	((cs = q0q0p0q0p1q0 & ports.e[time] = NULL & ports.b[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.a[time] = 0 & ports.g[time] = 1 & ports.g[time] != NULL & ports.g[time] = ports.d[time]) -> next(cs) = p0q0p0q0q0q0) &
+	((cs = q0q0p0q0p1q0 & ports.e[time] = NULL & ports.b[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.a[time] = 1 & ports.g[time] = 1 & ports.g[time] != NULL & ports.g[time] = ports.d[time]) -> next(cs) = p1q0p0q0q0q0) &
+	((cs = q0q0p1q0p0q0 & ports.e[time] = NULL & ports.b[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.a[time] = 0 & ports.g[time] = 0 & ports.g[time] != NULL & ports.g[time] = ports.d[time]) -> next(cs) = p0q0p1q0q0q0) &
+	((cs = q0q0p1q0p0q0 & ports.e[time] = NULL & ports.b[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.a[time] = 1 & ports.g[time] = 0 & ports.g[time] != NULL & ports.g[time] = ports.d[time]) -> next(cs) = p1q0p1q0q0q0) &
+	((cs = q0q0p1q0p1q0 & ports.e[time] = NULL & ports.b[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.a[time] = 0 & ports.g[time] = 1 & ports.g[time] != NULL & ports.g[time] = ports.d[time]) -> next(cs) = p0q0p1q0q0q0) &
+	((cs = q0q0p1q0p1q0 & ports.e[time] = NULL & ports.b[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.a[time] = 1 & ports.g[time] = 1 & ports.g[time] != NULL & ports.g[time] = ports.d[time]) -> next(cs) = p1q0p1q0q0q0) &
+	((cs = p0q0q0q0p0q0 & ports.a[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.e[time] = 0 & ports.e[time] != NULL & ports.e[time] = ports.b[time] & ports.e[time] = 0 & ports.g[time] = 0 & ports.g[time] != NULL & ports.g[time] = ports.d[time]) -> next(cs) = q0q0p0q0q0q0) &
+	((cs = p0q0q0q0p0q0 & ports.a[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.e[time] = 0 & ports.e[time] != NULL & ports.e[time] = ports.b[time] & ports.e[time] = 1 & ports.g[time] = 0 & ports.g[time] != NULL & ports.g[time] = ports.d[time]) -> next(cs) = q0q0p1q0q0q0) &
+	((cs = p0q0q0q0p1q0 & ports.a[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.e[time] = 0 & ports.e[time] != NULL & ports.e[time] = ports.b[time] & ports.e[time] = 0 & ports.g[time] = 1 & ports.g[time] != NULL & ports.g[time] = ports.d[time]) -> next(cs) = q0q0p0q0q0q0) &
+	((cs = p0q0q0q0p1q0 & ports.a[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.e[time] = 0 & ports.e[time] != NULL & ports.e[time] = ports.b[time] & ports.e[time] = 1 & ports.g[time] = 1 & ports.g[time] != NULL & ports.g[time] = ports.d[time]) -> next(cs) = q0q0p1q0q0q0) &
+	((cs = p1q0q0q0p0q0 & ports.a[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.e[time] = 1 & ports.e[time] != NULL & ports.e[time] = ports.b[time] & ports.e[time] = 0 & ports.g[time] = 0 & ports.g[time] != NULL & ports.g[time] = ports.d[time]) -> next(cs) = q0q0p0q0q0q0) &
+	((cs = p1q0q0q0p0q0 & ports.a[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.e[time] = 1 & ports.e[time] != NULL & ports.e[time] = ports.b[time] & ports.e[time] = 1 & ports.g[time] = 0 & ports.g[time] != NULL & ports.g[time] = ports.d[time]) -> next(cs) = q0q0p1q0q0q0) &
+	((cs = p1q0q0q0p1q0 & ports.a[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.e[time] = 1 & ports.e[time] != NULL & ports.e[time] = ports.b[time] & ports.e[time] = 0 & ports.g[time] = 1 & ports.g[time] != NULL & ports.g[time] = ports.d[time]) -> next(cs) = q0q0p0q0q0q0) &
+	((cs = p1q0q0q0p1q0 & ports.a[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.e[time] = 1 & ports.e[time] != NULL & ports.e[time] = ports.b[time] & ports.e[time] = 1 & ports.g[time] = 1 & ports.g[time] != NULL & ports.g[time] = ports.d[time]) -> next(cs) = q0q0p1q0q0q0) &
+	((cs = p1q0p1q0p0q0 & ports.a[time] = NULL & ports.e[time] = NULL & ports.b[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.g[time] = 0 & ports.g[time] != NULL & ports.g[time] = ports.d[time]) -> next(cs) = p1q0p1q0q0q0) &
+	((cs = p1q0p1q0p1q0 & ports.a[time] = NULL & ports.e[time] = NULL & ports.b[time] = NULL & ports.f[time] = NULL & ports.c[time] = NULL & ports.g[time] = 1 & ports.g[time] != NULL & ports.g[time] = ports.d[time]) -> next(cs) = p1q0p1q0q0q0) &
+	((cs = q0q0q0q0q0q0) -> ((next(cs) != q0q0q0q0p0q0) & (next(cs) != q0q0q0q0p1q0) & (next(cs) != q0q0p0q0q0q0) & (next(cs) != q0q0p0q0p0q0) & (next(cs) != q0q0p0q0p1q0) & (next(cs) != q0q0p1q0q0q0) & (next(cs) != q0q0p1q0p0q0) & (next(cs) != q0q0p1q0p1q0) & (next(cs) != p0q0q0q0p0q0) & (next(cs) != p0q0q0q0p1q0) & (next(cs) != p0q0p0q0q0q0) & (next(cs) != p0q0p0q0p0q0) & (next(cs) != p0q0p0q0p1q0) & (next(cs) != p0q0p1q0q0q0) & (next(cs) != p0q0p1q0p0q0) & (next(cs) != p0q0p1q0p1q0) & (next(cs) != p1q0q0q0p0q0) & (next(cs) != p1q0q0q0p1q0) & (next(cs) != p1q0p0q0q0q0) & (next(cs) != p1q0p0q0p0q0) & (next(cs) != p1q0p0q0p1q0) & (next(cs) != p1q0p1q0q0q0) & (next(cs) != p1q0p1q0p0q0) & (next(cs) != p1q0p1q0p1q0))) &
+	((cs = q0q0q0q0p0q0) -> ((next(cs) != q0q0q0q0q0q0) & (next(cs) != q0q0q0q0p1q0) & (next(cs) != q0q0p0q0q0q0) & (next(cs) != q0q0p0q0p0q0) & (next(cs) != q0q0p0q0p1q0) & (next(cs) != q0q0p1q0q0q0) & (next(cs) != q0q0p1q0p0q0) & (next(cs) != q0q0p1q0p1q0) & (next(cs) != p0q0q0q0p1q0) & (next(cs) != p0q0p0q0q0q0) & (next(cs) != p0q0p0q0p0q0) & (next(cs) != p0q0p0q0p1q0) & (next(cs) != p0q0p1q0q0q0) & (next(cs) != p0q0p1q0p0q0) & (next(cs) != p0q0p1q0p1q0) & (next(cs) != p1q0q0q0p1q0) & (next(cs) != p1q0p0q0q0q0) & (next(cs) != p1q0p0q0p0q0) & (next(cs) != p1q0p0q0p1q0) & (next(cs) != p1q0p1q0q0q0) & (next(cs) != p1q0p1q0p0q0) & (next(cs) != p1q0p1q0p1q0))) &
+	((cs = q0q0q0q0p1q0) -> ((next(cs) != q0q0q0q0q0q0) & (next(cs) != q0q0q0q0p0q0) & (next(cs) != q0q0p0q0q0q0) & (next(cs) != q0q0p0q0p0q0) & (next(cs) != q0q0p0q0p1q0) & (next(cs) != q0q0p1q0q0q0) & (next(cs) != q0q0p1q0p0q0) & (next(cs) != q0q0p1q0p1q0) & (next(cs) != p0q0q0q0p0q0) & (next(cs) != p0q0p0q0q0q0) & (next(cs) != p0q0p0q0p0q0) & (next(cs) != p0q0p0q0p1q0) & (next(cs) != p0q0p1q0q0q0) & (next(cs) != p0q0p1q0p0q0) & (next(cs) != p0q0p1q0p1q0) & (next(cs) != p1q0q0q0p0q0) & (next(cs) != p1q0p0q0q0q0) & (next(cs) != p1q0p0q0p0q0) & (next(cs) != p1q0p0q0p1q0) & (next(cs) != p1q0p1q0q0q0) & (next(cs) != p1q0p1q0p0q0) & (next(cs) != p1q0p1q0p1q0))) &
+	((cs = q0q0p0q0q0q0) -> ((next(cs) != q0q0q0q0q0q0) & (next(cs) != q0q0q0q0p0q0) & (next(cs) != q0q0q0q0p1q0) & (next(cs) != q0q0p0q0p0q0) & (next(cs) != q0q0p0q0p1q0) & (next(cs) != q0q0p1q0q0q0) & (next(cs) != q0q0p1q0p0q0) & (next(cs) != q0q0p1q0p1q0) & (next(cs) != p0q0q0q0q0q0) & (next(cs) != p0q0p0q0p0q0) & (next(cs) != p0q0p0q0p1q0) & (next(cs) != p0q0p1q0q0q0) & (next(cs) != p0q0p1q0p0q0) & (next(cs) != p0q0p1q0p1q0) & (next(cs) != p1q0q0q0q0q0) & (next(cs) != p1q0p0q0p0q0) & (next(cs) != p1q0p0q0p1q0) & (next(cs) != p1q0p1q0q0q0) & (next(cs) != p1q0p1q0p0q0) & (next(cs) != p1q0p1q0p1q0))) &
+	((cs = q0q0p0q0p0q0) -> ((next(cs) != q0q0q0q0q0q0) & (next(cs) != q0q0q0q0p0q0) & (next(cs) != q0q0q0q0p1q0) & (next(cs) != q0q0p0q0q0q0) & (next(cs) != q0q0p0q0p1q0) & (next(cs) != q0q0p1q0q0q0) & (next(cs) != q0q0p1q0p0q0) & (next(cs) != q0q0p1q0p1q0) & (next(cs) != p0q0q0q0q0q0) & (next(cs) != p0q0q0q0p0q0) & (next(cs) != p0q0q0q0p1q0) & (next(cs) != p0q0p0q0p1q0) & (next(cs) != p0q0p1q0q0q0) & (next(cs) != p0q0p1q0p0q0) & (next(cs) != p0q0p1q0p1q0) & (next(cs) != p1q0q0q0q0q0) & (next(cs) != p1q0q0q0p0q0) & (next(cs) != p1q0q0q0p1q0) & (next(cs) != p1q0p0q0p1q0) & (next(cs) != p1q0p1q0q0q0) & (next(cs) != p1q0p1q0p0q0) & (next(cs) != p1q0p1q0p1q0))) &
+	((cs = q0q0p0q0p1q0) -> ((next(cs) != q0q0q0q0q0q0) & (next(cs) != q0q0q0q0p0q0) & (next(cs) != q0q0q0q0p1q0) & (next(cs) != q0q0p0q0q0q0) & (next(cs) != q0q0p0q0p0q0) & (next(cs) != q0q0p1q0q0q0) & (next(cs) != q0q0p1q0p0q0) & (next(cs) != q0q0p1q0p1q0) & (next(cs) != p0q0q0q0q0q0) & (next(cs) != p0q0q0q0p0q0) & (next(cs) != p0q0q0q0p1q0) & (next(cs) != p0q0p0q0p0q0) & (next(cs) != p0q0p1q0q0q0) & (next(cs) != p0q0p1q0p0q0) & (next(cs) != p0q0p1q0p1q0) & (next(cs) != p1q0q0q0q0q0) & (next(cs) != p1q0q0q0p0q0) & (next(cs) != p1q0q0q0p1q0) & (next(cs) != p1q0p0q0p0q0) & (next(cs) != p1q0p1q0q0q0) & (next(cs) != p1q0p1q0p0q0) & (next(cs) != p1q0p1q0p1q0))) &
+	((cs = q0q0p1q0q0q0) -> ((next(cs) != q0q0q0q0q0q0) & (next(cs) != q0q0q0q0p0q0) & (next(cs) != q0q0q0q0p1q0) & (next(cs) != q0q0p0q0q0q0) & (next(cs) != q0q0p0q0p0q0) & (next(cs) != q0q0p0q0p1q0) & (next(cs) != q0q0p1q0p0q0) & (next(cs) != q0q0p1q0p1q0) & (next(cs) != p0q0q0q0q0q0) & (next(cs) != p0q0p0q0q0q0) & (next(cs) != p0q0p0q0p0q0) & (next(cs) != p0q0p0q0p1q0) & (next(cs) != p0q0p1q0p0q0) & (next(cs) != p0q0p1q0p1q0) & (next(cs) != p1q0q0q0q0q0) & (next(cs) != p1q0p0q0q0q0) & (next(cs) != p1q0p0q0p0q0) & (next(cs) != p1q0p0q0p1q0) & (next(cs) != p1q0p1q0p0q0) & (next(cs) != p1q0p1q0p1q0))) &
+	((cs = q0q0p1q0p0q0) -> ((next(cs) != q0q0q0q0q0q0) & (next(cs) != q0q0q0q0p0q0) & (next(cs) != q0q0q0q0p1q0) & (next(cs) != q0q0p0q0q0q0) & (next(cs) != q0q0p0q0p0q0) & (next(cs) != q0q0p0q0p1q0) & (next(cs) != q0q0p1q0q0q0) & (next(cs) != q0q0p1q0p1q0) & (next(cs) != p0q0q0q0q0q0) & (next(cs) != p0q0q0q0p0q0) & (next(cs) != p0q0q0q0p1q0) & (next(cs) != p0q0p0q0q0q0) & (next(cs) != p0q0p0q0p0q0) & (next(cs) != p0q0p0q0p1q0) & (next(cs) != p0q0p1q0p1q0) & (next(cs) != p1q0q0q0q0q0) & (next(cs) != p1q0q0q0p0q0) & (next(cs) != p1q0q0q0p1q0) & (next(cs) != p1q0p0q0q0q0) & (next(cs) != p1q0p0q0p0q0) & (next(cs) != p1q0p0q0p1q0) & (next(cs) != p1q0p1q0p1q0))) &
+	((cs = q0q0p1q0p1q0) -> ((next(cs) != q0q0q0q0q0q0) & (next(cs) != q0q0q0q0p0q0) & (next(cs) != q0q0q0q0p1q0) & (next(cs) != q0q0p0q0q0q0) & (next(cs) != q0q0p0q0p0q0) & (next(cs) != q0q0p0q0p1q0) & (next(cs) != q0q0p1q0q0q0) & (next(cs) != q0q0p1q0p0q0) & (next(cs) != p0q0q0q0q0q0) & (next(cs) != p0q0q0q0p0q0) & (next(cs) != p0q0q0q0p1q0) & (next(cs) != p0q0p0q0q0q0) & (next(cs) != p0q0p0q0p0q0) & (next(cs) != p0q0p0q0p1q0) & (next(cs) != p0q0p1q0p0q0) & (next(cs) != p1q0q0q0q0q0) & (next(cs) != p1q0q0q0p0q0) & (next(cs) != p1q0q0q0p1q0) & (next(cs) != p1q0p0q0q0q0) & (next(cs) != p1q0p0q0p0q0) & (next(cs) != p1q0p0q0p1q0) & (next(cs) != p1q0p1q0p0q0))) &
+	((cs = p0q0q0q0q0q0) -> ((next(cs) != q0q0q0q0q0q0) & (next(cs) != q0q0q0q0p0q0) & (next(cs) != q0q0q0q0p1q0) & (next(cs) != q0q0p0q0p0q0) & (next(cs) != q0q0p0q0p1q0) & (next(cs) != q0q0p1q0p0q0) & (next(cs) != q0q0p1q0p1q0) & (next(cs) != p0q0q0q0p0q0) & (next(cs) != p0q0q0q0p1q0) & (next(cs) != p0q0p0q0q0q0) & (next(cs) != p0q0p0q0p0q0) & (next(cs) != p0q0p0q0p1q0) & (next(cs) != p0q0p1q0q0q0) & (next(cs) != p0q0p1q0p0q0) & (next(cs) != p0q0p1q0p1q0) & (next(cs) != p1q0q0q0q0q0) & (next(cs) != p1q0q0q0p0q0) & (next(cs) != p1q0q0q0p1q0) & (next(cs) != p1q0p0q0q0q0) & (next(cs) != p1q0p0q0p0q0) & (next(cs) != p1q0p0q0p1q0) & (next(cs) != p1q0p1q0q0q0) & (next(cs) != p1q0p1q0p0q0) & (next(cs) != p1q0p1q0p1q0))) &
+	((cs = p0q0q0q0p0q0) -> ((next(cs) != q0q0q0q0q0q0) & (next(cs) != q0q0q0q0p0q0) & (next(cs) != q0q0q0q0p1q0) & (next(cs) != q0q0p0q0p1q0) & (next(cs) != q0q0p1q0p1q0) & (next(cs) != p0q0q0q0q0q0) & (next(cs) != p0q0q0q0p1q0) & (next(cs) != p0q0p0q0q0q0) & (next(cs) != p0q0p0q0p0q0) & (next(cs) != p0q0p0q0p1q0) & (next(cs) != p0q0p1q0q0q0) & (next(cs) != p0q0p1q0p0q0) & (next(cs) != p0q0p1q0p1q0) & (next(cs) != p1q0q0q0q0q0) & (next(cs) != p1q0q0q0p0q0) & (next(cs) != p1q0q0q0p1q0) & (next(cs) != p1q0p0q0q0q0) & (next(cs) != p1q0p0q0p0q0) & (next(cs) != p1q0p0q0p1q0) & (next(cs) != p1q0p1q0q0q0) & (next(cs) != p1q0p1q0p0q0) & (next(cs) != p1q0p1q0p1q0))) &
+	((cs = p0q0q0q0p1q0) -> ((next(cs) != q0q0q0q0q0q0) & (next(cs) != q0q0q0q0p0q0) & (next(cs) != q0q0q0q0p1q0) & (next(cs) != q0q0p0q0p0q0) & (next(cs) != q0q0p1q0p0q0) & (next(cs) != p0q0q0q0q0q0) & (next(cs) != p0q0q0q0p0q0) & (next(cs) != p0q0p0q0q0q0) & (next(cs) != p0q0p0q0p0q0) & (next(cs) != p0q0p0q0p1q0) & (next(cs) != p0q0p1q0q0q0) & (next(cs) != p0q0p1q0p0q0) & (next(cs) != p0q0p1q0p1q0) & (next(cs) != p1q0q0q0q0q0) & (next(cs) != p1q0q0q0p0q0) & (next(cs) != p1q0q0q0p1q0) & (next(cs) != p1q0p0q0q0q0) & (next(cs) != p1q0p0q0p0q0) & (next(cs) != p1q0p0q0p1q0) & (next(cs) != p1q0p1q0q0q0) & (next(cs) != p1q0p1q0p0q0) & (next(cs) != p1q0p1q0p1q0))) &
+	((cs = p0q0p0q0q0q0) -> ((next(cs) != q0q0q0q0q0q0) & (next(cs) != q0q0q0q0p0q0) & (next(cs) != q0q0q0q0p1q0) & (next(cs) != q0q0p0q0q0q0) & (next(cs) != q0q0p0q0p0q0) & (next(cs) != q0q0p0q0p1q0) & (next(cs) != q0q0p1q0q0q0) & (next(cs) != q0q0p1q0p0q0) & (next(cs) != q0q0p1q0p1q0) & (next(cs) != p0q0q0q0q0q0) & (next(cs) != p0q0q0q0p0q0) & (next(cs) != p0q0q0q0p1q0) & (next(cs) != p0q0p0q0p0q0) & (next(cs) != p0q0p0q0p1q0) & (next(cs) != p0q0p1q0q0q0) & (next(cs) != p0q0p1q0p0q0) & (next(cs) != p0q0p1q0p1q0) & (next(cs) != p1q0q0q0q0q0) & (next(cs) != p1q0q0q0p0q0) & (next(cs) != p1q0q0q0p1q0) & (next(cs) != p1q0p0q0q0q0) & (next(cs) != p1q0p0q0p0q0) & (next(cs) != p1q0p0q0p1q0) & (next(cs) != p1q0p1q0q0q0) & (next(cs) != p1q0p1q0p0q0) & (next(cs) != p1q0p1q0p1q0))) &
+	((cs = p0q0p0q0p0q0) -> ((next(cs) != q0q0q0q0q0q0) & (next(cs) != q0q0q0q0p0q0) & (next(cs) != q0q0q0q0p1q0) & (next(cs) != q0q0p0q0q0q0) & (next(cs) != q0q0p0q0p0q0) & (next(cs) != q0q0p0q0p1q0) & (next(cs) != q0q0p1q0q0q0) & (next(cs) != q0q0p1q0p0q0) & (next(cs) != q0q0p1q0p1q0) & (next(cs) != p0q0q0q0q0q0) & (next(cs) != p0q0q0q0p0q0) & (next(cs) != p0q0q0q0p1q0) & (next(cs) != p0q0p0q0q0q0) & (next(cs) != p0q0p0q0p1q0) & (next(cs) != p0q0p1q0q0q0) & (next(cs) != p0q0p1q0p0q0) & (next(cs) != p0q0p1q0p1q0) & (next(cs) != p1q0q0q0q0q0) & (next(cs) != p1q0q0q0p0q0) & (next(cs) != p1q0q0q0p1q0) & (next(cs) != p1q0p0q0q0q0) & (next(cs) != p1q0p0q0p0q0) & (next(cs) != p1q0p0q0p1q0) & (next(cs) != p1q0p1q0q0q0) & (next(cs) != p1q0p1q0p0q0) & (next(cs) != p1q0p1q0p1q0))) &
+	((cs = p0q0p0q0p1q0) -> ((next(cs) != q0q0q0q0q0q0) & (next(cs) != q0q0q0q0p0q0) & (next(cs) != q0q0q0q0p1q0) & (next(cs) != q0q0p0q0q0q0) & (next(cs) != q0q0p0q0p0q0) & (next(cs) != q0q0p0q0p1q0) & (next(cs) != q0q0p1q0q0q0) & (next(cs) != q0q0p1q0p0q0) & (next(cs) != q0q0p1q0p1q0) & (next(cs) != p0q0q0q0q0q0) & (next(cs) != p0q0q0q0p0q0) & (next(cs) != p0q0q0q0p1q0) & (next(cs) != p0q0p0q0q0q0) & (next(cs) != p0q0p0q0p0q0) & (next(cs) != p0q0p1q0q0q0) & (next(cs) != p0q0p1q0p0q0) & (next(cs) != p0q0p1q0p1q0) & (next(cs) != p1q0q0q0q0q0) & (next(cs) != p1q0q0q0p0q0) & (next(cs) != p1q0q0q0p1q0) & (next(cs) != p1q0p0q0q0q0) & (next(cs) != p1q0p0q0p0q0) & (next(cs) != p1q0p0q0p1q0) & (next(cs) != p1q0p1q0q0q0) & (next(cs) != p1q0p1q0p0q0) & (next(cs) != p1q0p1q0p1q0))) &
+	((cs = p0q0p1q0q0q0) -> ((next(cs) != q0q0q0q0q0q0) & (next(cs) != q0q0q0q0p0q0) & (next(cs) != q0q0q0q0p1q0) & (next(cs) != q0q0p0q0q0q0) & (next(cs) != q0q0p0q0p0q0) & (next(cs) != q0q0p0q0p1q0) & (next(cs) != q0q0p1q0q0q0) & (next(cs) != q0q0p1q0p0q0) & (next(cs) != q0q0p1q0p1q0) & (next(cs) != p0q0q0q0q0q0) & (next(cs) != p0q0q0q0p0q0) & (next(cs) != p0q0q0q0p1q0) & (next(cs) != p0q0p0q0q0q0) & (next(cs) != p0q0p0q0p0q0) & (next(cs) != p0q0p0q0p1q0) & (next(cs) != p0q0p1q0p0q0) & (next(cs) != p0q0p1q0p1q0) & (next(cs) != p1q0q0q0q0q0) & (next(cs) != p1q0q0q0p0q0) & (next(cs) != p1q0q0q0p1q0) & (next(cs) != p1q0p0q0q0q0) & (next(cs) != p1q0p0q0p0q0) & (next(cs) != p1q0p0q0p1q0) & (next(cs) != p1q0p1q0q0q0) & (next(cs) != p1q0p1q0p0q0) & (next(cs) != p1q0p1q0p1q0))) &
+	((cs = p0q0p1q0p0q0) -> ((next(cs) != q0q0q0q0q0q0) & (next(cs) != q0q0q0q0p0q0) & (next(cs) != q0q0q0q0p1q0) & (next(cs) != q0q0p0q0q0q0) & (next(cs) != q0q0p0q0p0q0) & (next(cs) != q0q0p0q0p1q0) & (next(cs) != q0q0p1q0q0q0) & (next(cs) != q0q0p1q0p0q0) & (next(cs) != q0q0p1q0p1q0) & (next(cs) != p0q0q0q0q0q0) & (next(cs) != p0q0q0q0p0q0) & (next(cs) != p0q0q0q0p1q0) & (next(cs) != p0q0p0q0q0q0) & (next(cs) != p0q0p0q0p0q0) & (next(cs) != p0q0p0q0p1q0) & (next(cs) != p0q0p1q0q0q0) & (next(cs) != p0q0p1q0p1q0) & (next(cs) != p1q0q0q0q0q0) & (next(cs) != p1q0q0q0p0q0) & (next(cs) != p1q0q0q0p1q0) & (next(cs) != p1q0p0q0q0q0) & (next(cs) != p1q0p0q0p0q0) & (next(cs) != p1q0p0q0p1q0) & (next(cs) != p1q0p1q0q0q0) & (next(cs) != p1q0p1q0p0q0) & (next(cs) != p1q0p1q0p1q0))) &
+	((cs = p0q0p1q0p1q0) -> ((next(cs) != q0q0q0q0q0q0) & (next(cs) != q0q0q0q0p0q0) & (next(cs) != q0q0q0q0p1q0) & (next(cs) != q0q0p0q0q0q0) & (next(cs) != q0q0p0q0p0q0) & (next(cs) != q0q0p0q0p1q0) & (next(cs) != q0q0p1q0q0q0) & (next(cs) != q0q0p1q0p0q0) & (next(cs) != q0q0p1q0p1q0) & (next(cs) != p0q0q0q0q0q0) & (next(cs) != p0q0q0q0p0q0) & (next(cs) != p0q0q0q0p1q0) & (next(cs) != p0q0p0q0q0q0) & (next(cs) != p0q0p0q0p0q0) & (next(cs) != p0q0p0q0p1q0) & (next(cs) != p0q0p1q0q0q0) & (next(cs) != p0q0p1q0p0q0) & (next(cs) != p1q0q0q0q0q0) & (next(cs) != p1q0q0q0p0q0) & (next(cs) != p1q0q0q0p1q0) & (next(cs) != p1q0p0q0q0q0) & (next(cs) != p1q0p0q0p0q0) & (next(cs) != p1q0p0q0p1q0) & (next(cs) != p1q0p1q0q0q0) & (next(cs) != p1q0p1q0p0q0) & (next(cs) != p1q0p1q0p1q0))) &
+	((cs = p1q0q0q0q0q0) -> ((next(cs) != q0q0q0q0q0q0) & (next(cs) != q0q0q0q0p0q0) & (next(cs) != q0q0q0q0p1q0) & (next(cs) != q0q0p0q0p0q0) & (next(cs) != q0q0p0q0p1q0) & (next(cs) != q0q0p1q0p0q0) & (next(cs) != q0q0p1q0p1q0) & (next(cs) != p0q0q0q0q0q0) & (next(cs) != p0q0q0q0p0q0) & (next(cs) != p0q0q0q0p1q0) & (next(cs) != p0q0p0q0q0q0) & (next(cs) != p0q0p0q0p0q0) & (next(cs) != p0q0p0q0p1q0) & (next(cs) != p0q0p1q0q0q0) & (next(cs) != p0q0p1q0p0q0) & (next(cs) != p0q0p1q0p1q0) & (next(cs) != p1q0q0q0p0q0) & (next(cs) != p1q0q0q0p1q0) & (next(cs) != p1q0p0q0q0q0) & (next(cs) != p1q0p0q0p0q0) & (next(cs) != p1q0p0q0p1q0) & (next(cs) != p1q0p1q0q0q0) & (next(cs) != p1q0p1q0p0q0) & (next(cs) != p1q0p1q0p1q0))) &
+	((cs = p1q0q0q0p0q0) -> ((next(cs) != q0q0q0q0q0q0) & (next(cs) != q0q0q0q0p0q0) & (next(cs) != q0q0q0q0p1q0) & (next(cs) != q0q0p0q0p1q0) & (next(cs) != q0q0p1q0p1q0) & (next(cs) != p0q0q0q0q0q0) & (next(cs) != p0q0q0q0p0q0) & (next(cs) != p0q0q0q0p1q0) & (next(cs) != p0q0p0q0q0q0) & (next(cs) != p0q0p0q0p0q0) & (next(cs) != p0q0p0q0p1q0) & (next(cs) != p0q0p1q0q0q0) & (next(cs) != p0q0p1q0p0q0) & (next(cs) != p0q0p1q0p1q0) & (next(cs) != p1q0q0q0q0q0) & (next(cs) != p1q0q0q0p1q0) & (next(cs) != p1q0p0q0q0q0) & (next(cs) != p1q0p0q0p0q0) & (next(cs) != p1q0p0q0p1q0) & (next(cs) != p1q0p1q0q0q0) & (next(cs) != p1q0p1q0p0q0) & (next(cs) != p1q0p1q0p1q0))) &
+	((cs = p1q0q0q0p1q0) -> ((next(cs) != q0q0q0q0q0q0) & (next(cs) != q0q0q0q0p0q0) & (next(cs) != q0q0q0q0p1q0) & (next(cs) != q0q0p0q0p0q0) & (next(cs) != q0q0p1q0p0q0) & (next(cs) != p0q0q0q0q0q0) & (next(cs) != p0q0q0q0p0q0) & (next(cs) != p0q0q0q0p1q0) & (next(cs) != p0q0p0q0q0q0) & (next(cs) != p0q0p0q0p0q0) & (next(cs) != p0q0p0q0p1q0) & (next(cs) != p0q0p1q0q0q0) & (next(cs) != p0q0p1q0p0q0) & (next(cs) != p0q0p1q0p1q0) & (next(cs) != p1q0q0q0q0q0) & (next(cs) != p1q0q0q0p0q0) & (next(cs) != p1q0p0q0q0q0) & (next(cs) != p1q0p0q0p0q0) & (next(cs) != p1q0p0q0p1q0) & (next(cs) != p1q0p1q0q0q0) & (next(cs) != p1q0p1q0p0q0) & (next(cs) != p1q0p1q0p1q0))) &
+	((cs = p1q0p0q0q0q0) -> ((next(cs) != q0q0q0q0q0q0) & (next(cs) != q0q0q0q0p0q0) & (next(cs) != q0q0q0q0p1q0) & (next(cs) != q0q0p0q0q0q0) & (next(cs) != q0q0p0q0p0q0) & (next(cs) != q0q0p0q0p1q0) & (next(cs) != q0q0p1q0q0q0) & (next(cs) != q0q0p1q0p0q0) & (next(cs) != q0q0p1q0p1q0) & (next(cs) != p0q0q0q0q0q0) & (next(cs) != p0q0q0q0p0q0) & (next(cs) != p0q0q0q0p1q0) & (next(cs) != p0q0p0q0q0q0) & (next(cs) != p0q0p0q0p0q0) & (next(cs) != p0q0p0q0p1q0) & (next(cs) != p0q0p1q0q0q0) & (next(cs) != p0q0p1q0p0q0) & (next(cs) != p0q0p1q0p1q0) & (next(cs) != p1q0q0q0q0q0) & (next(cs) != p1q0p0q0p0q0) & (next(cs) != p1q0p0q0p1q0) & (next(cs) != p1q0p1q0q0q0) & (next(cs) != p1q0p1q0p0q0) & (next(cs) != p1q0p1q0p1q0))) &
+	((cs = p1q0p0q0p0q0) -> ((next(cs) != q0q0q0q0q0q0) & (next(cs) != q0q0q0q0p0q0) & (next(cs) != q0q0q0q0p1q0) & (next(cs) != q0q0p0q0q0q0) & (next(cs) != q0q0p0q0p0q0) & (next(cs) != q0q0p0q0p1q0) & (next(cs) != q0q0p1q0q0q0) & (next(cs) != q0q0p1q0p0q0) & (next(cs) != q0q0p1q0p1q0) & (next(cs) != p0q0q0q0q0q0) & (next(cs) != p0q0q0q0p0q0) & (next(cs) != p0q0q0q0p1q0) & (next(cs) != p0q0p0q0q0q0) & (next(cs) != p0q0p0q0p0q0) & (next(cs) != p0q0p0q0p1q0) & (next(cs) != p0q0p1q0q0q0) & (next(cs) != p0q0p1q0p0q0) & (next(cs) != p0q0p1q0p1q0) & (next(cs) != p1q0q0q0q0q0) & (next(cs) != p1q0q0q0p0q0) & (next(cs) != p1q0q0q0p1q0) & (next(cs) != p1q0p0q0q0q0) & (next(cs) != p1q0p0q0p1q0) & (next(cs) != p1q0p1q0q0q0) & (next(cs) != p1q0p1q0p0q0) & (next(cs) != p1q0p1q0p1q0))) &
+	((cs = p1q0p0q0p1q0) -> ((next(cs) != q0q0q0q0q0q0) & (next(cs) != q0q0q0q0p0q0) & (next(cs) != q0q0q0q0p1q0) & (next(cs) != q0q0p0q0q0q0) & (next(cs) != q0q0p0q0p0q0) & (next(cs) != q0q0p0q0p1q0) & (next(cs) != q0q0p1q0q0q0) & (next(cs) != q0q0p1q0p0q0) & (next(cs) != q0q0p1q0p1q0) & (next(cs) != p0q0q0q0q0q0) & (next(cs) != p0q0q0q0p0q0) & (next(cs) != p0q0q0q0p1q0) & (next(cs) != p0q0p0q0q0q0) & (next(cs) != p0q0p0q0p0q0) & (next(cs) != p0q0p0q0p1q0) & (next(cs) != p0q0p1q0q0q0) & (next(cs) != p0q0p1q0p0q0) & (next(cs) != p0q0p1q0p1q0) & (next(cs) != p1q0q0q0q0q0) & (next(cs) != p1q0q0q0p0q0) & (next(cs) != p1q0q0q0p1q0) & (next(cs) != p1q0p0q0q0q0) & (next(cs) != p1q0p0q0p0q0) & (next(cs) != p1q0p1q0q0q0) & (next(cs) != p1q0p1q0p0q0) & (next(cs) != p1q0p1q0p1q0))) &
+	((cs = p1q0p1q0q0q0) -> ((next(cs) != q0q0q0q0q0q0) & (next(cs) != q0q0q0q0p0q0) & (next(cs) != q0q0q0q0p1q0) & (next(cs) != q0q0p0q0q0q0) & (next(cs) != q0q0p0q0p0q0) & (next(cs) != q0q0p0q0p1q0) & (next(cs) != q0q0p1q0q0q0) & (next(cs) != q0q0p1q0p0q0) & (next(cs) != q0q0p1q0p1q0) & (next(cs) != p0q0q0q0q0q0) & (next(cs) != p0q0q0q0p0q0) & (next(cs) != p0q0q0q0p1q0) & (next(cs) != p0q0p0q0q0q0) & (next(cs) != p0q0p0q0p0q0) & (next(cs) != p0q0p0q0p1q0) & (next(cs) != p0q0p1q0q0q0) & (next(cs) != p0q0p1q0p0q0) & (next(cs) != p0q0p1q0p1q0) & (next(cs) != p1q0q0q0q0q0) & (next(cs) != p1q0p0q0q0q0) & (next(cs) != p1q0p0q0p0q0) & (next(cs) != p1q0p0q0p1q0) & (next(cs) != p1q0p1q0p0q0) & (next(cs) != p1q0p1q0p1q0))) &
+	((cs = p1q0p1q0p0q0) -> ((next(cs) != q0q0q0q0q0q0) & (next(cs) != q0q0q0q0p0q0) & (next(cs) != q0q0q0q0p1q0) & (next(cs) != q0q0p0q0q0q0) & (next(cs) != q0q0p0q0p0q0) & (next(cs) != q0q0p0q0p1q0) & (next(cs) != q0q0p1q0q0q0) & (next(cs) != q0q0p1q0p0q0) & (next(cs) != q0q0p1q0p1q0) & (next(cs) != p0q0q0q0q0q0) & (next(cs) != p0q0q0q0p0q0) & (next(cs) != p0q0q0q0p1q0) & (next(cs) != p0q0p0q0q0q0) & (next(cs) != p0q0p0q0p0q0) & (next(cs) != p0q0p0q0p1q0) & (next(cs) != p0q0p1q0q0q0) & (next(cs) != p0q0p1q0p0q0) & (next(cs) != p0q0p1q0p1q0) & (next(cs) != p1q0q0q0q0q0) & (next(cs) != p1q0q0q0p0q0) & (next(cs) != p1q0q0q0p1q0) & (next(cs) != p1q0p0q0q0q0) & (next(cs) != p1q0p0q0p0q0) & (next(cs) != p1q0p0q0p1q0) & (next(cs) != p1q0p1q0p1q0))) &
+	((cs = p1q0p1q0p1q0) -> ((next(cs) != q0q0q0q0q0q0) & (next(cs) != q0q0q0q0p0q0) & (next(cs) != q0q0q0q0p1q0) & (next(cs) != q0q0p0q0q0q0) & (next(cs) != q0q0p0q0p0q0) & (next(cs) != q0q0p0q0p1q0) & (next(cs) != q0q0p1q0q0q0) & (next(cs) != q0q0p1q0p0q0) & (next(cs) != q0q0p1q0p1q0) & (next(cs) != p0q0q0q0q0q0) & (next(cs) != p0q0q0q0p0q0) & (next(cs) != p0q0q0q0p1q0) & (next(cs) != p0q0p0q0q0q0) & (next(cs) != p0q0p0q0p0q0) & (next(cs) != p0q0p0q0p1q0) & (next(cs) != p0q0p1q0q0q0) & (next(cs) != p0q0p1q0p0q0) & (next(cs) != p0q0p1q0p1q0) & (next(cs) != p1q0q0q0q0q0) & (next(cs) != p1q0q0q0p0q0) & (next(cs) != p1q0q0q0p1q0) & (next(cs) != p1q0p0q0q0q0) & (next(cs) != p1q0p0q0p0q0) & (next(cs) != p1q0p0q0p1q0) & (next(cs) != p1q0p1q0p0q0)));
+INVAR
+	(((prod1.cs = q0q0q0q0q0) & (prod2.cs = q0)) <-> (cs = q0q0q0q0q0q0)) &
+	(((prod1.cs = q0q0q0q0p0) & (prod2.cs = q0)) <-> (cs = q0q0q0q0p0q0)) &
+	(((prod1.cs = q0q0q0q0p1) & (prod2.cs = q0)) <-> (cs = q0q0q0q0p1q0)) &
+	(((prod1.cs = q0q0p0q0q0) & (prod2.cs = q0)) <-> (cs = q0q0p0q0q0q0)) &
+	(((prod1.cs = q0q0p0q0p0) & (prod2.cs = q0)) <-> (cs = q0q0p0q0p0q0)) &
+	(((prod1.cs = q0q0p0q0p1) & (prod2.cs = q0)) <-> (cs = q0q0p0q0p1q0)) &
+	(((prod1.cs = q0q0p1q0q0) & (prod2.cs = q0)) <-> (cs = q0q0p1q0q0q0)) &
+	(((prod1.cs = q0q0p1q0p0) & (prod2.cs = q0)) <-> (cs = q0q0p1q0p0q0)) &
+	(((prod1.cs = q0q0p1q0p1) & (prod2.cs = q0)) <-> (cs = q0q0p1q0p1q0)) &
+	(((prod1.cs = p0q0q0q0q0) & (prod2.cs = q0)) <-> (cs = p0q0q0q0q0q0)) &
+	(((prod1.cs = p0q0q0q0p0) & (prod2.cs = q0)) <-> (cs = p0q0q0q0p0q0)) &
+	(((prod1.cs = p0q0q0q0p1) & (prod2.cs = q0)) <-> (cs = p0q0q0q0p1q0)) &
+	(((prod1.cs = p0q0p0q0q0) & (prod2.cs = q0)) <-> (cs = p0q0p0q0q0q0)) &
+	(((prod1.cs = p0q0p0q0p0) & (prod2.cs = q0)) <-> (cs = p0q0p0q0p0q0)) &
+	(((prod1.cs = p0q0p0q0p1) & (prod2.cs = q0)) <-> (cs = p0q0p0q0p1q0)) &
+	(((prod1.cs = p0q0p1q0q0) & (prod2.cs = q0)) <-> (cs = p0q0p1q0q0q0)) &
+	(((prod1.cs = p0q0p1q0p0) & (prod2.cs = q0)) <-> (cs = p0q0p1q0p0q0)) &
+	(((prod1.cs = p0q0p1q0p1) & (prod2.cs = q0)) <-> (cs = p0q0p1q0p1q0)) &
+	(((prod1.cs = p1q0q0q0q0) & (prod2.cs = q0)) <-> (cs = p1q0q0q0q0q0)) &
+	(((prod1.cs = p1q0q0q0p0) & (prod2.cs = q0)) <-> (cs = p1q0q0q0p0q0)) &
+	(((prod1.cs = p1q0q0q0p1) & (prod2.cs = q0)) <-> (cs = p1q0q0q0p1q0)) &
+	(((prod1.cs = p1q0p0q0q0) & (prod2.cs = q0)) <-> (cs = p1q0p0q0q0q0)) &
+	(((prod1.cs = p1q0p0q0p0) & (prod2.cs = q0)) <-> (cs = p1q0p0q0p0q0)) &
+	(((prod1.cs = p1q0p0q0p1) & (prod2.cs = q0)) <-> (cs = p1q0p0q0p1q0)) &
+	(((prod1.cs = p1q0p1q0q0) & (prod2.cs = q0)) <-> (cs = p1q0p1q0q0q0)) &
+	(((prod1.cs = p1q0p1q0p0) & (prod2.cs = q0)) <-> (cs = p1q0p1q0p0q0)) &
+	(((prod1.cs = p1q0p1q0p1) & (prod2.cs = q0)) <-> (cs = p1q0p1q0p1q0));
+
+MODULE portsModule
+FROZENVAR
+	a : array 0..5 of {NULL, 0, 1};
+	e : array 0..5 of {NULL, 0, 1};
+	b : array 0..5 of {NULL, 0, 1};
+	f : array 0..5 of {NULL, 0, 1};
+	c : array 0..5 of {NULL, 0, 1};
+	g : array 0..5 of {NULL, 0, 1};
+	d : array 0..5 of {NULL, 0, 1};
+ASSIGN
+	init(a[0]) := 1;
+	init(a[1]) := 0;
+	init(a[2]) := 1;
+	init(a[3]) := 0;
+	init(a[4]) := NULL;
+	init(b[0]) := NULL;
+	init(b[1]) := 0;
+	init(b[2]) := NULL;
+	init(b[3]) := 0;
+	init(b[4]) := 1;
+	init(e[0]) := NULL;
+	init(e[1]) := NULL;
+	init(e[2]) := 1;
+	init(e[3]) := 1;
+	init(e[4]) := 1;
+	init(f[0]) := NULL;
+	init(f[1]) := 0;
+	init(f[2]) := 0;
+	init(f[3]) := 0;
+	init(f[4]) := NULL;
+	init(c[0]) := 0;
+	init(c[1]) := 1;
+	init(c[2]) := 1;
+	init(c[3]) := 1;
+	init(c[4]) := 1;
+	init(g[0]) := 0;
+	init(g[1]) := 0;
+	init(g[2]) := 0;
+	init(g[3]) := NULL;
+	init(g[4]) := NULL;
+	init(d[0]) := 1;
+	init(d[1]) := NULL;
+	init(d[2]) := NULL;
+	init(d[3]) := NULL;
+	init(d[4]) := 0;
