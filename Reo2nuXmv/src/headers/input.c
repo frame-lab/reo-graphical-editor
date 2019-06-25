@@ -405,6 +405,104 @@ struct Automato *createReplicator(char *ports, int nAuto)
     return automato;
 }
 
+struct Automato *createFilter(char *ports, int nAuto)
+{
+    char port1[20];
+    char port2[20];
+    memset(port1, 0, sizeof(port1));
+    memset(port2, 0, sizeof(port2));
+    int i = 0, j = 0;
+    while (ports[i] != ',')
+    {
+        port1[i] = ports[i];
+        i++;
+    }
+    i++;
+    while (ports[i] != ')')
+    {
+        if (ports[i] != ' ')
+        {
+            port2[j] = ports[i];
+            j++;
+        }
+        i++;
+    }
+    struct State *state1 = newState("q0", 1);
+    char *condition = (char *)malloc(600 * sizeof(char));
+    struct StringList *portsList = NULL;
+    portsList = addString(portsList, port1);
+    snprintf(condition, 600, "ports.%s[time] != NULL & TRUE", port1);
+    struct Transition *transition = (struct Transition *)malloc(sizeof(struct Transition));
+    transition->start = state1;
+    transition->end = state1;
+    transition->nPorts = 1;
+    transition->ports = portsList;
+    transition->condition = condition;
+    transition->blocked = 0;
+    addTransition(transition);
+    condition = (char *)malloc(600 * sizeof(char));
+    portsList = NULL;
+    portsList = addString(portsList, port1);
+    portsList = addString(portsList, port2);
+    snprintf(condition, 600, "ports.%s[time] != NULL & ports.%s[time] = ports.%s[time] & TRUE", port1, port1, port2);
+    transition = (struct Transition *)malloc(sizeof(struct Transition));
+    transition->start = state1;
+    transition->end = state1;
+    transition->nPorts = 2;
+    transition->ports = portsList;
+    transition->condition = condition;
+    transition->blocked = 0;
+    addTransition(transition);
+    char *automatoName = (char *)malloc(600 * sizeof(char));
+    snprintf(automatoName, 600, "filter%d", nAuto);
+    struct Automato *automato = newAutomato(automatoName);
+    addState(state1, automato);
+    return automato;
+}
+
+struct Automato *createTransformer(char *ports, int nAuto)
+{
+    char port1[20];
+    char port2[20];
+    memset(port1, 0, sizeof(port1));
+    memset(port2, 0, sizeof(port2));
+    int i = 0, j = 0;
+    while (ports[i] != ',')
+    {
+        port1[i] = ports[i];
+        i++;
+    }
+    i++;
+    while (ports[i] != ')')
+    {
+        if (ports[i] != ' ')
+        {
+            port2[j] = ports[i];
+            j++;
+        }
+        i++;
+    }
+    struct State *state1 = newState("q0", 1);
+    char *condition = (char *)malloc(600 * sizeof(char));
+    struct StringList *portsList = NULL;
+    portsList = addString(portsList, port1);
+    portsList = addString(portsList, port2);
+    snprintf(condition, 600, "ports.%s[time] != NULL & TRUE", port1);
+    struct Transition *transition = (struct Transition *)malloc(sizeof(struct Transition));
+    transition->start = state1;
+    transition->end = state1;
+    transition->nPorts = 1;
+    transition->ports = portsList;
+    transition->condition = condition;
+    transition->blocked = 0;
+    addTransition(transition);
+    char *automatoName = (char *)malloc(600 * sizeof(char));
+    snprintf(automatoName, 600, "transformer%d", nAuto);
+    struct Automato *automato = newAutomato(automatoName);
+    addState(state1, automato);
+    return automato;
+}
+
 struct AutomatoList *
 readInput(FILE *f)
 {
@@ -480,6 +578,18 @@ readInput(FILE *f)
         {
             nAuto++;
             temp = createReplicator(ports, nAuto);
+            automatoList = addAutomato(automatoList, temp);
+        }
+        if (strcmp(command, "filter") == 0)
+        {
+            nAuto++;
+            temp = createFilter(ports, nAuto);
+            automatoList = addAutomato(automatoList, temp);
+        }
+        if (strcmp(command, "transformer") == 0)
+        {
+            nAuto++;
+            temp = createTransformer(ports, nAuto);
             automatoList = addAutomato(automatoList, temp);
         }
         memset(line, '\0', sizeof(line));

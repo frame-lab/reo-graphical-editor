@@ -155,9 +155,9 @@ document.getElementById("select").onclick = () => buttonClick(document.getElemen
 // document.getElementById("split").onclick = () => buttonClick(document.getElementById("split"));
 document.getElementById("component").onclick = () => buttonClick(document.getElementById("component"));
 
-downloadResponse = function (response) {
+downloadResponse = function (response, filename) {
 	var blob = new Blob([response], { type: "octet/stream" });
-	var fileName = "test.zip";
+	var fileName = filename;
 	var a = document.createElement("a");
 	document.body.appendChild(a);
 	a.style = "display:none";
@@ -186,8 +186,11 @@ async function download(format) {
 		case 'treo':
 			a.href = window.URL.createObjectURL(new Blob([codeEditor.getValue()], { type: "text/plain" }));
 			break;
-		case 'nuXmv':
-			httpPostAsync('http://127.0.0.1:8081/nuXmv', downloadResponse);
+		case 'nuXmvCompact':
+			httpPostAsync('http://127.0.0.1:8081/nuXmv/compact', downloadResponse, 'compactNuXmv.smv');
+			break;
+		case 'nuXmvComponents':
+			httpPostAsync('http://127.0.0.1:8081/nuXmv/components', downloadResponse, 'componentsNuXmv.smv');
 			break;
 	}
 	a.click()
@@ -196,15 +199,22 @@ async function download(format) {
 document.getElementById("downloadSVG").onclick = async () => download();
 document.getElementById("downloadPNG").onclick = async () => download('png');
 document.getElementById("downloadTreo").onclick = async () => download('treo');
-document.getElementById("nuXmv").onclick = async () => download('nuXmv');
+document.getElementById("nuXmvCompact").onclick = async () => download('nuXmvCompact');
+document.getElementById("nuXmvComponents").onclick = async () => download('nuXmvComponents');
 
 
-function httpPostAsync(theUrl, callback) {
+function httpPostAsync(theUrl, callback, filename) {
 	var xmlHttp = new XMLHttpRequest();
 	var data = { content: codeEditor.getValue() }
 	xmlHttp.onreadystatechange = function () {
-		if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
-			callback(xmlHttp.response);
+		if (xmlHttp.readyState == 4) {
+			if (this.status !== 200)
+				throw new Error(`Error returned with status ${this.status}: ${this.statusText}`);
+			if (filename)
+				callback(xmlHttp.response, filename);
+			else
+				callback(xmlHttp.response);
+		}
 	}
 	xmlHttp.open("POST", theUrl, true); // true for asynchronous 
 	xmlHttp.setRequestHeader("Content-Type", "application/json");

@@ -18,7 +18,7 @@ var mimeTypes = {
 http.createServer((request, response) => {
     var pathname = url.parse(request.url).pathname;
     var filename;
-    if (pathname === '/nuXmv') {
+    if (pathname === '/nuXmv/compact') {
         processPost(request, response, function () {
             fs.writeFileSync("./Reo2nuXmv/input.txt", request.post.content);
 
@@ -26,49 +26,75 @@ http.createServer((request, response) => {
             exec('cd Reo2nuXmv && ./reo2nuXmv', (err, stdout, stderr) => {
                 if (err) {
                     console.log(err);
+                    response.writeHead(500, { 'Content-Type': 'text/plain' });
                     response.write(err.message);
                     response.end(err.message);
                     return;
                 }
-                var archive = archiver('zip', {
-                    gzip: true,
-                    zlib: { level: 9 } // Sets the compression level.
-                });
-                archive.on('error', function (err) {
-                    throw err;
-                });
-                // pipe archive data to the output file
-                response.writeHead(200, {
-                    'Content-Type': 'application/zip',
-                    'Content-disposition': 'attachment; filename=myFile.zip'
-                });
-                archive.pipe(response);
+                var filestream = fs.createReadStream('./Reo2nuXmv/nuxmv2.smv');
+                response.writeHead(200, { 'Content-Type': 'text/plain' });
+                filestream.pipe(response);
+                // var archive = archiver('zip', {
+                //     gzip: true,
+                //     zlib: { level: 9 } // Sets the compression level.
+                // });
+                // archive.on('error', function (err) {
+                //     throw err;
+                // });
+                // // pipe archive data to the output file
+                // response.writeHead(200, {
+                //     'Content-Type': 'application/zip',
+                //     'Content-disposition': 'attachment; filename=myFile.zip'
+                // });
+                // archive.pipe(response);
 
-                // append files
-                archive.file('./Reo2nuXmv/nuxmv.smv', { name: 'componentProduct.txt' });
-                archive.file('./Reo2nuXmv/nuxmv2.smv', { name: 'compactProduct.txt' });
-                archive.finalize();
+                // // append files
+                // archive.file('./Reo2nuXmv/nuxmv.smv', { name: 'componentProduct.txt' });
+                // archive.file('./Reo2nuXmv/nuxmv2.smv', { name: 'compactProduct.txt' });
+                // archive.finalize();
             });
         });
     } else {
-        if (pathname === "/") {
-            filename = "./public/index.html";
+        if (pathname === '/nuXmv/components') {
+            processPost(request, response, function () {
+                fs.writeFileSync("./Reo2nuXmv/input.txt", request.post.content);
+
+                const { exec } = require('child_process');
+                exec('cd Reo2nuXmv && ./reo2nuXmv', (err, stdout, stderr) => {
+                    if (err) {
+                        console.log(err);
+                        response.writeHead(500, { 'Content-Type': 'text/plain' });
+                        response.write(err.message);
+                        response.end(err.message);
+                        return;
+                    } else {
+                        var filestream = fs.createReadStream('./Reo2nuXmv/nuxmv.smv');
+                        response.writeHead(200, { 'Content-Type': 'text/plain' });
+                        filestream.pipe(response);
+                    }
+                });
+            });
         }
-        else
-            filename = path.join('./public', pathname);
-        try {
-            fs.accessSync(filename, fs.F_OK);
-            var fileStream = fs.createReadStream(filename);
-            var mimeType = mimeTypes[path.extname(filename).split(".")[1]];
-            response.writeHead(200, { 'Content-Type': mimeType });
-            fileStream.pipe(response);
-        }
-        catch (e) {
-            console.log('File not exists: ' + filename);
-            response.writeHead(404, { 'Content-Type': 'text/plain' });
-            response.write('404 Not Found\n');
-            response.end();
-            return;
+        else {
+            if (pathname === "/") {
+                filename = "./public/index.html";
+            }
+            else
+                filename = path.join('./public', pathname);
+            try {
+                fs.accessSync(filename, fs.F_OK);
+                var fileStream = fs.createReadStream(filename);
+                var mimeType = mimeTypes[path.extname(filename).split(".")[1]];
+                response.writeHead(200, { 'Content-Type': mimeType });
+                fileStream.pipe(response);
+            }
+            catch (e) {
+                console.log('File not exists: ' + filename);
+                response.writeHead(404, { 'Content-Type': 'text/plain' });
+                response.write('404 Not Found\n');
+                response.end();
+                return;
+            }
         }
     }
     return;
