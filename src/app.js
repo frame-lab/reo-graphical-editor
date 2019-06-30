@@ -176,6 +176,7 @@ async function download(format) {
 	format = format || 'svg';
 	const a = document.createElement('a');
 	a.download = "reo." + format;
+	console.log("mAGRINHO MC");
 	switch (format) {
 		case 'png':
 			a.href = canvas.toDataURL();
@@ -192,6 +193,9 @@ async function download(format) {
 		case 'nuXmvComponents':
 			httpPostAsync('http://127.0.0.1:8081/nuXmv/components', downloadResponse, 'componentsNuXmv.smv');
 			break;
+		case 'coqModel':
+			httpPostAsync('http://127.0.0.1:8081/coq/model', downloadResponse, 'coqModel.v');
+			break;			
 	}
 	a.click()
 }
@@ -201,6 +205,7 @@ document.getElementById("downloadPNG").onclick = async () => download('png');
 document.getElementById("downloadTreo").onclick = async () => download('treo');
 document.getElementById("nuXmvCompact").onclick = async () => download('nuXmvCompact');
 document.getElementById("nuXmvComponents").onclick = async () => download('nuXmvComponents');
+document.getElementById("coqModel").onclick = async () => download('coqModel');
 
 
 function httpPostAsync(theUrl, callback, filename) {
