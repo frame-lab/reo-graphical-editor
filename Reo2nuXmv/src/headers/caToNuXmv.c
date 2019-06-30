@@ -273,7 +273,7 @@ void randomPort(FILE *f, char *port, int timeMax)
     }
 }
 
-void portsToNuXmv(FILE *f, struct StringList *ports)
+int portsToNuXmv(FILE *f, struct StringList *ports)
 {
     FILE *pFile = fopen("ports.txt", "r");
     int timeMax = 0;
@@ -327,7 +327,7 @@ void portsToNuXmv(FILE *f, struct StringList *ports)
     fprintf(f, "MODULE portsModule\nFROZENVAR\n");
     while (tempPorts != NULL)
     {
-        fprintf(f, "\t%s : array 0..%d of {NULL, 0, 1};\n", tempPorts->string, timeMax);
+        fprintf(f, "\t%s : array 0..%d of {NULL, 0, 1};\n", tempPorts->string, timeMax - 1);
         tempPorts = tempPorts->nextString;
     }
     fprintf(f, "ASSIGN\n");
@@ -347,8 +347,10 @@ void portsToNuXmv(FILE *f, struct StringList *ports)
         randomPort(f, tempPorts->string, timeMax);
         tempPorts = tempPorts->nextString;
     }
+    fprintf(f, "\n");
     delStringList(tempPorts);
     tempPorts = NULL;
+    return timeMax;
 }
 
 void printaAutomatoFinal(struct Automato *automato)
@@ -360,10 +362,10 @@ void printaAutomatoFinal(struct Automato *automato)
         exit(1);
     }
 
-    fprintf(f, "MODULE main\nVAR\n\ttime: 0..3;\n\tautomato: %s(time);\n", automato->name);
-    fprintf(f, "ASSIGN\n\tinit(time) := 0;\n\tnext(time) := case\n\t\ttime < 3: time + 1;\n\t\tTRUE: time;\nesac;\n\n");
+    int time = portsToNuXmv(f, automato->ports) - 1;
+    fprintf(f, "MODULE main\nVAR\n\ttime: 0..%d;\n\tautomato: %s(time);\n", time, automato->name);
+    fprintf(f, "ASSIGN\n\tinit(time) := 0;\n\tnext(time) := case\n\t\ttime < %d: time + 1;\n\t\tTRUE: time;\nesac;\n\n", time);
     caToNuxmv(automato, automato->ports, f);
-    portsToNuXmv(f, automato->ports);
 
     fclose(f);
 }
@@ -697,11 +699,12 @@ void startNuxmv(struct AutomatoList *automatos)
         ports = unionStringList(ports, automatoList->automato->ports);
         automatoList = automatoList->nextAutomato;
     }
+    int time = portsToNuXmv(f, ports) - 1;
     prods = productInSmv(automatos, ports, f);
     prodsTemp = prods;
     automatoList = automatos;
-    fprintf(f, "MODULE main\nVAR\n\ttime: 0..3;\n\t%s: %s(time);\n", "finalAutomata", "finalAutomata");
-    fprintf(f, "ASSIGN\n\tinit(time) := 0;\n\tnext(time) := case\n\t\ttime < 3: time + 1;\n\t\tTRUE: time;\nesac;\n\n");
+    fprintf(f, "MODULE main\nVAR\n\ttime: 0..%d;\n\t%s: %s(time);\n", time, "finalAutomata", "finalAutomata");
+    fprintf(f, "ASSIGN\n\tinit(time) := 0;\n\tnext(time) := case\n\t\ttime < %d: time + 1;\n\t\tTRUE: time;\nesac;\n\n", time);
     while (automatoList != NULL)
     {
         caToNuxmv(automatoList->automato, ports, f);
@@ -716,7 +719,6 @@ void startNuxmv(struct AutomatoList *automatos)
             printaAutomatoFinal(prodsTemp->automato->automato);
         prodsTemp = prodsTemp->nextAutomato;
     }
-    portsToNuXmv(f, ports);
     delStringList(ports);
     delAutomatoProdList(prods);
     fclose(f);
