@@ -670,7 +670,7 @@ void input2CoqCA(FILE *f) {
 			fprintf(output, "%s | ",coqPorts->string);
 			coqPorts = coqPorts->nextString;
 		}
-		fprintf(output, "\t %s. \n",coqPorts->string);
+		fprintf(output, " %s. \n",coqPorts->string);
 
 		//proof of equality between ports:
 		fprintf(output,"Instance modelPortsEqDec : EqDec modelPortsType eq :=\n");
@@ -678,10 +678,12 @@ void input2CoqCA(FILE *f) {
 		fprintf(output,"\t\t match x, y with \n");
 		coqPorts = resultingPorts;
 		while(coqPorts){
-			struct StringList * nextp = coqPorts -> nextString;
-			fprintf(output,"\t\t| %s , %s => in_left \n",coqPorts->string,coqPorts->string);
-			while(nextp){
-				fprintf(output,"\t\t| %s , %s => in_right\n",coqPorts->string,nextp->string);
+			struct StringList * nextp = resultingPorts;
+				while(nextp){
+				if(!strcmp(coqPorts->string,nextp->string))
+					fprintf(output,"\t\t| %s , %s => in_left \n",coqPorts->string,coqPorts->string);
+				else
+					fprintf(output,"\t\t| %s , %s => in_right\n",coqPorts->string,nextp->string);
 				nextp = nextp -> nextString;
 			}
 			coqPorts = coqPorts -> nextString;
@@ -703,6 +705,7 @@ void input2CoqCA(FILE *f) {
 		while(singleState){
 			if(isItIn(resultingStates, singleState->state->name)){
 				singleState->state->name[0]++; //erick: p diferenciar os estados. conferir como isso afeta os estados resultantes
+				while(isItIn(resultingStates, singleState->state->name)) singleState->state->name[0]++; //na hora de incremetar tem que ver se já existe
 				
 			}
 			currStates = addString(currStates,singleState->state->name);
@@ -723,10 +726,12 @@ void input2CoqCA(FILE *f) {
 		fprintf(output,"\t\t match x, y with \n");
 		coqStates = currStates;
 		while(coqStates){
-			struct StringList * nextp = coqStates -> nextString;
-			fprintf(output,"\t\t| %s , %s => in_left \n",coqStates->string,coqStates->string);
+			struct StringList * nextp = currStates;
 			while(nextp){
-				fprintf(output,"\t\t| %s , %s => in_right\n",coqStates->string,nextp->string);
+				if(!strcmp(coqStates->string,nextp -> string))
+					fprintf(output,"\t\t| %s , %s => in_left \n",coqStates->string,nextp->string);
+				else					
+					fprintf(output,"\t\t| %s , %s => in_right \n",coqStates->string,nextp->string);
 				nextp = nextp -> nextString;
 			}
 			coqStates = coqStates -> nextString;
@@ -752,17 +757,19 @@ void input2CoqCA(FILE *f) {
 		//single state transitions
 		while(automatonStates -> nextState){
 			struct State *currentState = automatonStates->state;
+			struct Transition *currentTrans;
 			//printf("%s", modelAutomata->automato->states->state->transitions->transition->condition);
 			fprintf(output,"\t\t | %s => [", currentState->name);
 			struct TransitionList *transitionsForCurrentState = currentState->transitions;
-			while (transitionsForCurrentState){
+			while (transitionsForCurrentState -> nextTransition){
 				struct Transition *currentTrans = transitionsForCurrentState->transition;
 				fprintf(output,"([");
 				struct StringList *ports = currentTrans->ports;
-				while (ports){
+				while (ports->nextString){
 					fprintf(output,"%s;",ports ->string);
 					ports = ports->nextString;				
 				}
+				fprintf(output,"%s",ports ->string);
 				char *cond = currentTrans->condition;
 				//erick:tratamento pro tipo dc:
 				if (strstr(cond,"tDc")){
@@ -770,17 +777,36 @@ void input2CoqCA(FILE *f) {
 					strcat(cond, dataDomain);
 				}
 				fprintf(output,"], %s", cond);//erick:traduzir condições pra coq. posso fazer isso diretamente nas funções la em cima.
-				fprintf(output, "[%s]);", currentTrans->end->name);
+				fprintf(output, " [%s]); ", currentTrans->end->name);
 				transitionsForCurrentState = transitionsForCurrentState -> nextTransition;
 			}
+			//last transition for a single state
+			currentTrans = transitionsForCurrentState->transition;
+			printf("%s",currentTrans->condition);
+			fprintf(output,"([");
+			struct StringList *ports = currentTrans->ports;
+			while (ports -> nextString){
+				fprintf(output,"%s;",ports ->string);
+				ports = ports->nextString;				
+			}
+			fprintf(output,"%s",ports ->string);
+			char *cond = currentTrans->condition;
+			//erick:tratamento pro tipo dc:
+			if (strstr(cond,"tDc")){
+				strcat(cond," modelPortsEqDec ");
+				strcat(cond, dataDomain);
+			}
+			fprintf(output,"], %s", cond);//erick:traduzir condições pra coq. posso fazer isso diretamente nas funções la em cima.
+			fprintf(output, " [%s])] \n", currentTrans->end->name);
 			automatonStates = automatonStates->nextState;
 		}
 		//last transition
 		struct State *currentState = automatonStates->state;
 		//printf("%s", modelAutomata->automato->states->state->transitions->transition->condition);
+		struct Transition *currentTrans;
 		fprintf(output,"\t\t | %s => [", currentState->name);
 		struct TransitionList *transitionsForCurrentState = currentState->transitions;
-		while (transitionsForCurrentState){
+		while (transitionsForCurrentState -> nextTransition){
 			struct Transition * currentTrans = transitionsForCurrentState->transition;
 			fprintf(output,"([");
 			struct StringList *ports = currentTrans->ports;
@@ -795,9 +821,26 @@ void input2CoqCA(FILE *f) {
 					strcat(cond,dataDomain);
 			}
 			fprintf(output,"], %s", cond);//erick:traduzir condições pra coq. posso fazer isso diretamente nas funções la em cima.
-			fprintf(output, "[%s])]\n", currentTrans->end->name);
+			fprintf(output, " [%s])];", currentTrans->end->name);
 			transitionsForCurrentState = transitionsForCurrentState -> nextTransition;
+		}	
+		currentTrans = transitionsForCurrentState->transition;
+		printf("%s",currentTrans->condition);
+		fprintf(output,"([");
+		struct StringList *ports = currentTrans->ports;
+		while (ports -> nextString){
+			fprintf(output,"%s;",ports ->string);
+			ports = ports->nextString;				
 		}
+		fprintf(output,"%s",ports ->string);
+		char *cond = currentTrans->condition;
+		//erick:tratamento pro tipo dc:
+		if (strstr(cond,"tDc")){
+			strcat(cond," modelPortsEqDec ");
+			strcat(cond, dataDomain);
+		}
+		fprintf(output,"], %s", cond);//erick:traduzir condições pra coq. posso fazer isso diretamente nas funções la em cima.
+		fprintf(output, " [%s])] \n", currentTrans->end->name);
 		fprintf(output,"\tend.\n");
 
 		//automaton definition
@@ -805,10 +848,12 @@ void input2CoqCA(FILE *f) {
 		//automaton's states
 		fprintf(output,"\tConstraintAutomata.Q := [");		
 		struct StateList * initialState = modelAutomata->automato->states;
-		while(initialState){
-			fprintf(output,"%s",initialState->state->name);
+		while(initialState->nextState){
+			fprintf(output,"%s;",initialState->state->name);
 			initialState = initialState->nextState;
 		}
+		fprintf(output,"%s",initialState->state->name);
+		initialState = initialState->nextState;
 		fprintf(output,"];\n");
 		//automaton's ports
 		fprintf(output,"\tConstraintAutomata.N := [");		
@@ -854,6 +899,7 @@ void input2CoqCA(FILE *f) {
 		strcpy(currProductName,modelAutomata->automato->name);
 		strcat(currProductName,nextAutomaton->automato->name);
 		fprintf(output,"Definition %sProduct := ProductAutomata.buildPA %sProduct %sAutomaton.\n",currProductName,lastProductName,nextAutomaton->automato->name);
+		nextAutomaton = nextAutomaton ->nextAutomato;
 	}
 
 	fclose(output);
