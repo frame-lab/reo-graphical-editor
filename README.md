@@ -1,5 +1,5 @@
 # Reo Graphical Editor
-Web-based graphical editor for Reo language
+Web-based graphical editor for Reo language integrating [reo2nuXmv](https://github.com/frame-lab/Reo2nuXmv) and [CACoq](https://github.com/frame-lab/CACoq) tools.
 
 ## Build
 
@@ -15,24 +15,16 @@ $ npm i
 ```
 
 ### Building
-For a development build, run command:
+In the project's root directory there is a makefile, you can run it with:
 ```console
-$ npm run dev:build
+$ make
 ```
-
-For a production (minimized and optimized) build, run command:
-```console
-$ npm run prod:build
-```
-
-Note: The process of minimizing will take some time.
 
 ## Running
 After building the project, run command:
 ```console
 $ npm start
 ```
-Then go to localhost:8080 and have fun!
 
 ## Origin
-This repository is in continuation of the original project developed by [@maarten1001](https://github.com/maarten1001).
+This repository is a fork of [reo-graphical-editor](https://github.com/ReoLanguage/reo-graphical-editor) project developed by [@AliMirlou](https://github.com/AliMirlou).
