@@ -176,7 +176,6 @@ async function download(format) {
 	format = format || 'svg';
 	const a = document.createElement('a');
 	a.download = "reo." + format;
-	console.log("mAGRINHO MC");
 	switch (format) {
 		case 'png':
 			a.href = canvas.toDataURL();
