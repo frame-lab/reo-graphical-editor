@@ -94,6 +94,25 @@ http.createServer((request, response) => {
                     }
                 });
             });
+	} else {
+	  	 if (pathname === '/haskell/model') {
+			processPost(request, response, function () {
+                fs.writeFileSync("./CACoq/input.txt", request.post.content);
+                const { exec } = require('child_process');
+                exec('cd CACoq && ./reo2CACoqHs && coqc ', (err, stdout, stderr) => {
+                    if (err) {
+                        console.log(err);
+                        response.writeHead(569, { 'Content-Type': 'text/plain' });
+                        response.write(err.message);
+                        response.end(err.message);
+                        return response;
+                    } else {
+                        var filestream = fs.createReadStream('./CACoq/haskellModel.hs');
+                        response.writeHead(200, { 'Content-Type': 'text/plain' });
+                        filestream.pipe(response);
+                    }
+                });
+            });
 	}
         else {
             if (pathname === "/") {
@@ -118,7 +137,7 @@ http.createServer((request, response) => {
         }
     }
     return;
-}}).listen(8081, '127.0.0.1');
+}}}).listen(8081, '127.0.0.1');
 
 console.log('Server running at http://127.0.0.1:8081/');
 

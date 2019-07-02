@@ -194,7 +194,10 @@ async function download(format) {
 			break;
 		case 'coqModel':
 			httpPostAsync('http://127.0.0.1:8081/coq/model', downloadResponse, 'coqModel.v');
-			break;			
+			break;
+		case 'haskellModel':
+			httpPostAsync('http://127.0.0.1:8081/haskell/model', downloadResponse, 'haskellModel.hs');
+			break;
 	}
 	a.click()
 }
@@ -205,6 +208,7 @@ document.getElementById("downloadTreo").onclick = async () => download('treo');
 document.getElementById("nuXmvCompact").onclick = async () => download('nuXmvCompact');
 document.getElementById("nuXmvComponents").onclick = async () => download('nuXmvComponents');
 document.getElementById("coqModel").onclick = async () => download('coqModel');
+document.getElementById("haskellModel").onclick = async () => download('haskellModel');
 
 
 function httpPostAsync(theUrl, callback, filename) {
@@ -212,8 +216,12 @@ function httpPostAsync(theUrl, callback, filename) {
 	var data = { content: codeEditor.getValue() }
 	xmlHttp.onreadystatechange = function () {
 		if (xmlHttp.readyState == 4) {
-			if (this.status !== 200)
+			if (this.status !== 200){
+				console.log(this);
+				if(filename === 'haskellModel.hs' && this.status === 569)
+					alert("Error in generating Haskell Model: Coq version 8.7 or higher is required.");
 				throw new Error(`Error returned with status ${this.status}: ${this.statusText}`);
+			}
 			if (filename)
 				callback(xmlHttp.response, filename);
 			else
