@@ -99,7 +99,7 @@ http.createServer((request, response) => {
 			processPost(request, response, function () {
                 fs.writeFileSync("./CACoq/input.txt", request.post.content);
                 const { exec } = require('child_process');
-                exec('cd CACoq && ./reo2CACoqHs && coqc ', (err, stdout, stderr) => {
+                exec('cd CACoq && ./reo2CACoqHs && coqc CaMain.v && coqc coqModelHs.v', (err, stdout, stderr) => {
                     if (err) {
                         console.log(err);
                         response.writeHead(569, { 'Content-Type': 'text/plain' });
