@@ -1,10 +1,11 @@
-# Reo Graphical Editor
+# ReoXplore
 Web-based graphical editor for Reo language integrating [reo2nuXmv](https://github.com/frame-lab/Reo2nuXmv) and [CACoq](https://github.com/frame-lab/CACoq) tools.
 
 ## Build
 
 ### Prerequisites
 * NodeJS
+* Coq (to generate Haskell code)
 
 Note: The editor is not compatible with Internet Explorer.
 
