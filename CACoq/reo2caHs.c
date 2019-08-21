@@ -619,6 +619,9 @@ void freeAuxStringList(struct StringList *l){
 
 void input2CoqCAHs(FILE *f) {
     struct AutomatoList *automatoList = readInput(f);
+	if(!automatoList -> automato -> name);
+		//empty file
+		return;
 	struct StringList *resultingPorts = NULL;
 	//controls states that have been declared
 	struct StringList *resultingStates = NULL;

@@ -31,8 +31,7 @@ struct Automato *createSync(char *ports, int nAuto)
     struct StringList *portsList = NULL;
     portsList = addString(portsList, port1);
     portsList = addString(portsList, port2);
-    //snprintf(condition, 600, "ports.%s[time] != NULL & ports.%s[time] = ports.%s[time]", port1, port1, port2);
-	snprintf(condition, 83, "ConstraintAutomata.eqDc nat %s %s ", port1, port2); //erick: ver como isso afeta estados não determinísticos. acho que não afeta. seria melhor preecher o destino na condition?
+	snprintf(condition, 83, "ConstraintAutomata.eqDc nat %s %s ", port1, port2); 
     struct Transition *transition = (struct Transition *)malloc(sizeof(struct Transition));
     transition->start = state1;
     transition->end = state1;
@@ -87,7 +86,7 @@ struct Automato *createLossy(char *ports, int nAuto)
     condition = (char *)malloc(600 * sizeof(char));
     portsList = NULL;
     portsList = addString(portsList, port1);
-    snprintf(condition, 600, "ConstraintAutomata.tDc"); //erick: ao recuperar esse cara, escrever o tipo esperado pelo tDc.
+    snprintf(condition, 600, "ConstraintAutomata.tDc");
     transition = (struct Transition *)malloc(sizeof(struct Transition));
     transition->start = state1;
     transition->end = state1;
@@ -540,7 +539,6 @@ readInput(FILE *f)
             i++;
             j++;
         }
-	printf("%s",line);
         if (strcmp(command, "sync") == 0)
         {
             nAuto++;
@@ -619,6 +617,9 @@ void freeAuxStringList(struct StringList *l){
 
 void input2CoqCA(FILE *f) {
     struct AutomatoList *automatoList = readInput(f);
+	if(!automatoList -> automato -> name);
+		//empty file
+		return;
 	struct StringList *resultingPorts = NULL;
 	//controls states that have been declared
 	struct StringList *resultingStates = NULL;
@@ -773,12 +774,11 @@ void input2CoqCA(FILE *f) {
 				}
 				fprintf(output,"%s",ports ->string);
 				char *cond = currentTrans->condition;
-				//erick:tratamento pro tipo dc:
 				if (strstr(cond,"tDc")){
 					strcat(cond," modelPortsEqDec ");
 					strcat(cond, dataDomain);
 				}
-				fprintf(output,"], %s ,", cond);//erick:traduzir condições pra coq. posso fazer isso diretamente nas funções la em cima.
+				fprintf(output,"], %s ,", cond);
 				fprintf(output, " [%s]); ", currentTrans->end->name);
 				transitionsForCurrentState = transitionsForCurrentState -> nextTransition;
 			}
@@ -798,7 +798,7 @@ void input2CoqCA(FILE *f) {
 				strcat(cond," modelPortsEqDec ");
 				strcat(cond, dataDomain);
 			}
-			fprintf(output,"], %s ,", cond);//erick:traduzir condições pra coq. posso fazer isso diretamente nas funções la em cima.
+			fprintf(output,"], %s ,", cond);
 			fprintf(output, " [%s])] \n", currentTrans->end->name);
 			automatonStates = automatonStates->nextState;
 		}
@@ -822,7 +822,7 @@ void input2CoqCA(FILE *f) {
 					strcat(cond," modelPortsEqDec ");
 					strcat(cond,dataDomain);
 			}
-			fprintf(output,"], %s ,", cond);//erick:traduzir condições pra coq. posso fazer isso diretamente nas funções la em cima.
+			fprintf(output,"], %s ,", cond);
 			fprintf(output, " [%s])];", currentTrans->end->name);
 			transitionsForCurrentState = transitionsForCurrentState -> nextTransition;
 		}	
@@ -841,7 +841,7 @@ void input2CoqCA(FILE *f) {
 			strcat(cond," modelPortsEqDec ");
 			strcat(cond, dataDomain);
 		}
-		fprintf(output,"], %s ,", cond);//erick:traduzir condições pra coq. posso fazer isso diretamente nas funções la em cima.
+		fprintf(output,"], %s ,", cond);
 		fprintf(output, " [%s])] \n", currentTrans->end->name);
 		fprintf(output,"\tend.\n");
 
