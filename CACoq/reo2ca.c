@@ -630,7 +630,7 @@ void input2CoqCA(FILE *f) {
 	struct StringList *resultingStates = NULL;
 	struct StringList *currStates;
 	int k = 0;
-	int stateCount = 0;
+	int stateCount = 1;
     char line[1024];
     char command[1024];
 	char transitionRelName[69];

@@ -69,14 +69,14 @@ Module ConstraintAutomata.
 
     Context `{EqDec name eq} `{EqDec state eq} `{EqDec (option data) eq}.
 
-    Notation " a <? b " := (Qle_bool a b).
+    Notation " a <? b " :=  (negb (Qle_bool b a)).
     Notation "a =? b" := (Qeq_bool a b).
 
     Record port := mkport{
       id : name;
       dataAssignment : nat -> option data; 
       timeStamp : nat -> QArith_base.Q;
-      portCond : forall n:nat, Qle (timeStamp n) (timeStamp (S n));
+      portCond : forall n:nat, Qlt (timeStamp n) (timeStamp (S n));
       index : nat
 
     }.
@@ -280,7 +280,7 @@ Module ConstraintAutomata.
   Check getAllThetaTimes.
 
     Definition getNextThetaTime (l: set QArith_base.Q) :=
-       returnSmallerNumber (1000000#1) (l).
+       returnSmallerNumber (hd (Qmake 0 1) l) (tl l).
 
     Program Fixpoint count_into_list (n:nat) :=
       match n with
