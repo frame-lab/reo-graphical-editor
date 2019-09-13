@@ -294,7 +294,7 @@ struct Automato *createMerger(char *ports, int nAuto)
         i++;
     }
     i++;
-    while (ports[i] != ')')
+    while (ports[i] != ',')
     {
         if (ports[i] != ' ')
         {
@@ -363,7 +363,7 @@ struct Automato *createReplicator(char *ports, int nAuto)
         i++;
     }
     i++;
-    while (ports[i] != ')')
+    while (ports[i] != ',')
     {
         if (ports[i] != ' ')
         {

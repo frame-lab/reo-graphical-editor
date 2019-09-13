@@ -130,7 +130,7 @@ struct Automato *createFifo(char *ports, int nAuto)
     char *condition = (char *)malloc(600 * sizeof(char));
     struct StringList *portsList = NULL;
     portsList = addString(portsList, port1);
-    snprintf(condition, 100, "ConstraintAutomata.dc %s = (Some 0)", port1); //erick: parei aqui na tradução
+    snprintf(condition, 100, "ConstraintAutomata.dc %s 0", port1); 
     struct Transition *transition = (struct Transition *)malloc(sizeof(struct Transition));
     transition->start = state1;
     transition->end = state2;
@@ -142,7 +142,7 @@ struct Automato *createFifo(char *ports, int nAuto)
     condition = (char *)malloc(600 * sizeof(char));
     portsList = NULL;
     portsList = addString(portsList, port1);
-    snprintf(condition, 100, "ConstraintAutomata.dc %s = (Some 1)", port1);
+    snprintf(condition, 100, "ConstraintAutomata.dc %s 1", port1);
     transition = (struct Transition *)malloc(sizeof(struct Transition));
     transition->start = state1;
     transition->end = state3;
@@ -154,7 +154,7 @@ struct Automato *createFifo(char *ports, int nAuto)
     condition = (char *)malloc(600 * sizeof(char));
     portsList = NULL;
     portsList = addString(portsList, port2);
-    snprintf(condition, 83, "ConstraintAutomata.dc %s = (Some 1)", port2);
+    snprintf(condition, 83, "ConstraintAutomata.dc %s 1", port2);
     transition = (struct Transition *)malloc(sizeof(struct Transition));
     transition->start = state3;
     transition->end = state1;
@@ -166,7 +166,7 @@ struct Automato *createFifo(char *ports, int nAuto)
     condition = (char *)malloc(600 * sizeof(char));
     portsList = NULL;
     portsList = addString(portsList, port2);
-    snprintf(condition, 600, "ConstraintAutomata.dc %s = (Some 0)", port2);
+    snprintf(condition, 600, "ConstraintAutomata.dc %s 0", port2);
     transition = (struct Transition *)malloc(sizeof(struct Transition));
     transition->start = state2;
     transition->end = state1;
@@ -290,6 +290,7 @@ struct Automato *createMerger(char *ports, int nAuto)
     memset(port2, 0, sizeof(port2));
     memset(port3, 0, sizeof(port3));
     int i = 0, j = 0;
+
     while (ports[i] != ',')
     {
         port1[i] = ports[i];
@@ -305,23 +306,26 @@ struct Automato *createMerger(char *ports, int nAuto)
         }
         i++;
     }
-    i++;
+    //i++;
     j = 0;
     while (ports[i] != ')')
     {
         if (ports[i] != ' ')
         {
             port3[j] = ports[i];
+	    //printf("%c",ports[i]);
             j++;
         }
         i++;
     }
+ 
+
     struct State *state1 = newState("q0", 1);
     char *condition = (char *)malloc(600 * sizeof(char));
     struct StringList *portsList = NULL;
     portsList = addString(portsList, port1);
     portsList = addString(portsList, port3);
-    snprintf(condition, 600, "ports.%s[time] != NULL & ports.%s[time] = ports.%s[time]", port3, port1, port3);
+    snprintf(condition, 600, "ConstraintAutmata.eqDc nat %s %s", port1, port3);
     struct Transition *transition = (struct Transition *)malloc(sizeof(struct Transition));
     transition->start = state1;
     transition->end = state1;
@@ -334,7 +338,7 @@ struct Automato *createMerger(char *ports, int nAuto)
     portsList = NULL;
     portsList = addString(portsList, port2);
     portsList = addString(portsList, port3);
-    snprintf(condition, 600, "ports.%s[time] != NULL & ports.%s[time] = ports.%s[time]", port3, port2, port3);
+    snprintf(condition, 600,  "ConstraintAutmata.eqDc nat %s %s", port2, port3);
     transition = (struct Transition *)malloc(sizeof(struct Transition));
     transition->start = state1;
     transition->end = state1;
@@ -365,17 +369,19 @@ struct Automato *createReplicator(char *ports, int nAuto)
         i++;
     }
     i++;
-    while (ports[i] != ')')
+    while (ports[i] != ',')
     {
         if (ports[i] != ' ')
         {
             port2[j] = ports[i];
+		printf("%c",ports[i]);
             j++;
         }
         i++;
     }
     i++;
     j = 0;
+    printf("%c",ports[i]);
     while (ports[i] != ')')
     {
         if (ports[i] != ' ')
@@ -391,7 +397,7 @@ struct Automato *createReplicator(char *ports, int nAuto)
     portsList = addString(portsList, port1);
     portsList = addString(portsList, port2);
     portsList = addString(portsList, port3);
-    snprintf(condition, 600, "ports.%s[time] != NULL & ports.%s[time] = ports.%s[time] & ports.%s[time] = ports.%s[time]", port1, port1, port2, port1, port3);
+    snprintf(condition, 600, "ConstraintAutomata.andDc (ConstraintAutomata.eqDc %s %s) (ConstraintAutomata.eqDc %s %s)", port1, port2, port1, port3);
     struct Transition *transition = (struct Transition *)malloc(sizeof(struct Transition));
     transition->start = state1;
     transition->end = state1;
@@ -624,8 +630,7 @@ void input2CoqCA(FILE *f) {
 	struct StringList *resultingStates = NULL;
 	struct StringList *currStates;
 	int k = 0;
-	//printf("%s", automatoList[0].automato->ports->string);
-    //struct Automato *temp = NULL;
+	int stateCount = 0;
     char line[1024];
     char command[1024];
 	char transitionRelName[69];
@@ -705,8 +710,8 @@ void input2CoqCA(FILE *f) {
 		struct StateList * singleState = automatonStates->automato->states;
 		while(singleState){
 			if(isItIn(resultingStates, singleState->state->name)){
-				singleState->state->name[0]++; //erick: p diferenciar os estados. conferir como isso afeta os estados resultantes
-				while(isItIn(resultingStates, singleState->state->name)) singleState->state->name[0]++; //na hora de incremetar tem que ver se já existe
+				singleState->state->name[1]++; //erick: p diferenciar os estados. conferir como isso afeta os estados resultantes - 13/09 - incrementa incorretamente
+				while(isItIn(resultingStates, singleState->state->name)) singleState->state->name[1]++; //na hora de incremetar tem que ver se já existe
 				
 			}
 			currStates = addString(currStates,singleState->state->name);
@@ -751,7 +756,6 @@ void input2CoqCA(FILE *f) {
 	//transitions definition
 	while(modelAutomata){
 		struct StateList *automatonStates = modelAutomata->automato->states;
-		//implicit argument (caso explicit nao de cert)
 		strcpy(transitionRelName,modelAutomata->automato->name);
 		strcat(transitionRelName,"rel");
 		fprintf(output,"Definition %srel (s: %sStatesType) :=\n",modelAutomata->automato->name,modelAutomata->automato->name);
@@ -775,11 +779,11 @@ void input2CoqCA(FILE *f) {
 				char *cond = currentTrans->condition;
 				//erick:tratamento pro tipo dc:
 				if (strstr(cond,"tDc")){
-					strcat(cond," modelPortsEqDec ");
+					strcat(cond," modelPortsType ");
 					strcat(cond, dataDomain);
 				}
-				fprintf(output,"], %s ,", cond);//erick:traduzir condições pra coq. posso fazer isso diretamente nas funções la em cima.
-				fprintf(output, " [%s]); ", currentTrans->end->name);
+				fprintf(output,"], %s ,", cond);
+				fprintf(output, " %s); ", currentTrans->end->name);
 				transitionsForCurrentState = transitionsForCurrentState -> nextTransition;
 			}
 			//last transition for a single state
@@ -795,11 +799,11 @@ void input2CoqCA(FILE *f) {
 			char *cond = currentTrans->condition;
 			//erick:tratamento pro tipo dc:
 			if (strstr(cond,"tDc")){
-				strcat(cond," modelPortsEqDec ");
+				strcat(cond," modelPorts ");
 				strcat(cond, dataDomain);
 			}
 			fprintf(output,"], %s ,", cond);//erick:traduzir condições pra coq. posso fazer isso diretamente nas funções la em cima.
-			fprintf(output, " [%s])] \n", currentTrans->end->name);
+			fprintf(output, " %s)] \n", currentTrans->end->name);
 			automatonStates = automatonStates->nextState;
 		}
 		//last transition
@@ -819,11 +823,11 @@ void input2CoqCA(FILE *f) {
 			fprintf(output,"%s",ports ->string);
 			char *cond = currentTrans->condition;
 			if (strstr(cond,"tDc")){
-					strcat(cond," modelPortsEqDec ");
+					strcat(cond," modelPorts ");
 					strcat(cond,dataDomain);
 			}
 			fprintf(output,"], %s ,", cond);//erick:traduzir condições pra coq. posso fazer isso diretamente nas funções la em cima.
-			fprintf(output, " [%s])];", currentTrans->end->name);
+			fprintf(output, " %s)];", currentTrans->end->name);
 			transitionsForCurrentState = transitionsForCurrentState -> nextTransition;
 		}	
 		currentTrans = transitionsForCurrentState->transition;
@@ -838,11 +842,11 @@ void input2CoqCA(FILE *f) {
 		char *cond = currentTrans->condition;
 		//erick:tratamento pro tipo dc:
 		if (strstr(cond,"tDc")){
-			strcat(cond," modelPortsEqDec ");
+			strcat(cond," modelPortsType ");
 			strcat(cond, dataDomain);
 		}
 		fprintf(output,"], %s ,", cond);//erick:traduzir condições pra coq. posso fazer isso diretamente nas funções la em cima.
-		fprintf(output, " [%s])] \n", currentTrans->end->name);
+		fprintf(output, " %s)] \n", currentTrans->end->name);
 		fprintf(output,"\tend.\n");
 
 		//automaton definition
