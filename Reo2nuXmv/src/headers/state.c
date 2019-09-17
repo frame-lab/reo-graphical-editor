@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include "state.h"
 
-struct State *newState(char name[20], int init)
+struct State *newState(char name[600], int init)
 {
     struct State *state = (struct State *)malloc(sizeof(struct State));
     if (state == NULL)
@@ -72,7 +72,7 @@ void delState(struct State *state)
     }
 }
 
-struct State *findState(struct StateList *states, char name[20])
+struct State *findState(struct StateList *states, char name[600])
 {
     while (states != NULL)
     {
@@ -83,7 +83,7 @@ struct State *findState(struct StateList *states, char name[20])
     return NULL;
 }
 
-struct Automato *newAutomato(char name[20])
+struct Automato *newAutomato(char name[600])
 {
     struct Automato *automato = (struct Automato *)malloc(sizeof(struct Automato));
     if (automato == NULL)
@@ -459,4 +459,19 @@ void printStateList(struct StateList *states)
         printf("----------------------\n");
         states = states->nextState;
     }
+}
+
+struct TransitionList *addTransitions(struct TransitionList *transitions, struct TransitionList *newTransitions)
+{
+    struct TransitionList *trans = NULL;
+    struct TransitionList *resp = transitions;
+    while (newTransitions != NULL)
+    {
+        trans = (struct TransitionList *)malloc(sizeof(struct TransitionList));
+        trans->transition = newTransitions->transition;
+        trans->nextTransition = resp;
+        resp = trans;
+        newTransitions = newTransitions->nextTransition;
+    }
+    return trans;
 }
