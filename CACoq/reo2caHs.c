@@ -898,16 +898,22 @@ void input2CoqCAHs(FILE *f) {
 	if(nextAutomaton){
 		strcpy(lastProductName,modelAutomata->automato->name);
 		strcat(lastProductName,nextAutomaton->automato->name);
+		strcat(lastProductName,"Product");
 		strcpy(currProductName,lastProductName);
 		//product must be done using two automata at a time.
-		fprintf(output,"Definition %sProduct := ProductAutomata.buildPA %sAutomaton %sAutomaton.\n",lastProductName,modelAutomata->automato->name,nextAutomaton->automato->name);
+		fprintf(output,"Definition %s := ProductAutomata.buildPA %sAutomaton %sAutomaton.\n",lastProductName,modelAutomata->automato->name,nextAutomaton->automato->name);
+		modelAutomata = nextAutomaton;
 		nextAutomaton = nextAutomaton->nextAutomato;
 	}
-	while(nextAutomaton){
+	while(nextAutomaton){				
 		strcpy(currProductName,modelAutomata->automato->name);
-		strcat(currProductName,nextAutomaton->automato->name);
-		fprintf(output,"Definition %sProduct := ProductAutomata.buildPA %sProduct %sAutomaton.\n",currProductName,lastProductName,nextAutomaton->automato->name);
-		nextAutomaton = nextAutomaton ->nextAutomato;
+		strcat(currProductName, nextAutomaton->automato->name);
+		strcat(currProductName,"Product");
+		fprintf(output,"Definition %s := ProductAutomata.buildPA %s %sAutomaton.\n",currProductName,lastProductName,nextAutomaton->automato->name);
+		strcpy(lastProductName,currProductName);
+		modelAutomata = nextAutomaton;
+		nextAutomaton = nextAutomaton -> nextAutomato;
+			
 	}
 	fprintf(output,"Require Extraction.\n");
 	fprintf(output,"Extraction Language Haskell.\n");
