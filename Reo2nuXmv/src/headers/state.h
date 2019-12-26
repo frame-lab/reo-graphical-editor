@@ -3,7 +3,7 @@
 
 struct Automato
 {
-    char name[60];
+    char name[600];
     int nStates;
     struct StateList *states;
     int nPorts;
@@ -21,7 +21,7 @@ struct AutomatoProd
 
 struct State
 {
-    char name[20];
+    char name[600];
     int nTrans;
     struct TransitionList *transitions;
     int init;
@@ -39,9 +39,9 @@ struct Transition
 
 struct Condition
 {
-    char port[20];
+    char port[600];
     char operation;
-    char value[20];
+    char value[600];
 };
 
 struct StateList
@@ -135,5 +135,7 @@ void delAutomatoProdList(struct AutomatoProdList *automatos);
 void delAutomatoProd(struct AutomatoProd *automato);
 
 struct AutomatoProdList *addAutomatoProd(struct AutomatoProdList *automatoList, struct AutomatoProd *automato);
+
+struct TransitionList *addTransitions(struct TransitionList *transitions, struct TransitionList *newTransitions);
 
 #endif
