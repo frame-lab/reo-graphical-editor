@@ -76,7 +76,7 @@ void caToNuxmv(struct Automato *automato, struct StringList *ports, FILE *f)
             }
             if (transitions->transition->end->name == states->state->name)
             {
-                fprintf(f, "%s(cs = %s &", second ? "\n\t| " : "(", transitions->transition->start->name);
+                fprintf(f, "%s(cs = %s & ", second ? "\n\t| " : "(", transitions->transition->start->name);
                 nullPorts(ports, transitions->transition, f);
                 fprintf(f, " %s%s)", transitions->transition->condition, transitions->transition->blocked == 1 ? " & FALSE" : "");
                 second++;
@@ -94,7 +94,7 @@ void caToNuxmv(struct Automato *automato, struct StringList *ports, FILE *f)
                 fprintf(f, "TRANS\n\t");
                 printTrans = 0;
             }
-            fprintf(f, " &\n\t((cs = %s) -> (", states->state->name);
+            fprintf(f, "%s((cs = %s) -> (", second ? " &\n\t" : "", states->state->name);
             while (tempStatesNames != NULL)
             {
                 fprintf(f, "(next(cs) != %s)%s", tempStatesNames->string, tempStatesNames->nextString != NULL ? " & " : "))");
@@ -373,7 +373,6 @@ void printaAutomatoFinal(struct Automato *automato)
         printf("Error opening file!\n");
         exit(1);
     }
-
     int time = portsToNuXmv(f, automato->ports) - 1;
     fprintf(f, "MODULE main\nVAR\n\ttime: 0..%d;\n\tautomato: %s(time);\n", time, automato->name);
     fprintf(f, "ASSIGN\n\tinit(time) := 0;\n\tnext(time) := case\n\t\ttime < %d: time + 1;\n\t\tTRUE: time;\nesac;\n\n", time);
@@ -674,7 +673,7 @@ void prodToNuxmv(struct AutomatoProd *prod, struct StringList *ports, FILE *f)
             }
             if (transitions->transition->end->name == states->state->name && transitions->transition->blocked != 2)
             {
-                fprintf(f, "%s(cs = %s &", second ? "\n\t| " : "(", transitions->transition->start->name);
+                fprintf(f, "%s(cs = %s & ", second ? "\n\t| " : "(", transitions->transition->start->name);
                 nullPorts(ports, transitions->transition, f);
                 fprintf(f, " %s%s)", transitions->transition->condition, transitions->transition->blocked == 1 ? " & FALSE" : "");
                 second++;

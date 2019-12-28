@@ -473,5 +473,9 @@ struct TransitionList *addTransitions(struct TransitionList *transitions, struct
         resp = trans;
         newTransitions = newTransitions->nextTransition;
     }
+    if (trans == NULL)
+    {
+        return resp;
+    }
     return trans;
 }

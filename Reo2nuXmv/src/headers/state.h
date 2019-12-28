@@ -130,6 +130,8 @@ void addStateWithoutPorts(struct State *state, struct Automato *automato);
 
 struct AutomatoProd *newAutomatoProd();
 
+void printTransitions(struct TransitionList *transisitions);
+
 void delAutomatoProdList(struct AutomatoProdList *automatos);
 
 void delAutomatoProd(struct AutomatoProd *automato);
