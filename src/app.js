@@ -216,9 +216,9 @@ function httpPostAsync(theUrl, callback, filename) {
 	var data = { content: codeEditor.getValue() }
 	xmlHttp.onreadystatechange = function () {
 		if (xmlHttp.readyState == 4) {
-			if (this.status !== 200){
+			if (this.status !== 200) {
 				console.log(this);
-				if(filename === 'haskellModel.hs' && this.status === 569)
+				if (filename === 'haskellModel.hs' && this.status === 569)
 					alert("Error in generating Haskell Model: Coq version 8.7 or higher is required.");
 				throw new Error(`Error returned with status ${this.status}: ${this.statusText}`);
 			}
@@ -234,19 +234,55 @@ function httpPostAsync(theUrl, callback, filename) {
 	xmlHttp.send(JSON.stringify(data));
 }
 
-// document.getElementById("submit").onclick = async function () {
-// 	ReoInterpreter.parse(codeEditor.getValue(), listener);  // FIXME code should not be collected from editor (because of the comment switch)
-// 	try {
-// 		clearAll();
-// 		eval(listener.generateCode())
-// 	} catch (e) {
-// 		alert(e)
-// 	}
-// };
-
-document.getElementById("commentSwitch").onclick = function () {
-	updateText()
+document.getElementById("submit").onclick = async function () {
+	// ReoInterpreter.parse(codeEditor.getValue(), listener);  // FIXME code should not be collected from editor (because of the comment switch)
+	try {
+		let codeLines = codeEditor.getValue().replace(/\t/g, '').split('\n');
+		clearAll();
+		codeLines.forEach(line => {
+			let processedLine = proccesLine(line)
+			if (processedLine) {
+				createChannel(processedLine.name, processedLine.node1, processedLine.node2);
+			}
+		})
+		// eval(listener.generateCode())
+	} catch (e) {
+		alert(e)
+	}
 };
+
+function proccesLine(line) {
+	let linePos = line.indexOf('(');
+	if (linePos === -1) return null;
+	let name = line.substring(0, linePos).trim();
+	if (name === 'main') return null;
+	let node1 = {};
+	let linePos2 = line.indexOf(',');
+	node1.name = line.substring(linePos + 1, linePos2).trim();
+	linePos = linePos2 + 1;
+	linePos2 = line.indexOf(')');
+	let node2 = {};
+	node2.name = line.substring(linePos, linePos2).trim();
+	line = line.substring(linePos2 + 1);
+	linePos = line.indexOf('[') + 1;
+	linePos2 = line.indexOf(',');
+	node1.x = parseInt(line.substring(linePos, linePos2).trim());
+	linePos = linePos2 + 1;
+	linePos2 = line.indexOf(']');
+	node1.y = parseInt(line.substring(linePos, linePos2).trim());
+	line = line.substring(linePos2 + 2);
+	linePos = line.indexOf('[') + 1;
+	linePos2 = line.indexOf(',');
+	node2.x = parseInt(line.substring(linePos, linePos2).trim());
+	linePos = linePos2 + 1;
+	linePos2 = line.indexOf(']');
+	node2.y = parseInt(line.substring(linePos, linePos2).trim());
+	return { name: name, node1: node1, node2: node2 }
+};
+
+// document.getElementById("commentSwitch").onclick = function () {
+// 	updateText()
+// };
 
 // Channel defining modal
 const modal = document.getElementById('newChannelModal');
@@ -823,7 +859,8 @@ function isBoundaryNode(node) {
 }
 
 function updateText() {
-	codeEditor.setValue(components.map(c => c.toReoDefinition(document.getElementById('commentSwitch').checked)).join('\n'))
+	// codeEditor.setValue(components.map(c => c.toReoDefinition(document.getElementById('commentSwitch').checked)).join('\n'))
+	codeEditor.setValue(components.map(c => c.toReoDefinition(true)).join('\n'))
 }
 
 function snapToComponent(node, comp) {
@@ -1710,7 +1747,7 @@ function createComponent(x1, y1, x2, y2, name, manual) {  // FIXME parent compon
 	component.toReoDefinition = function (withComment) {
 		return `${this.id}(${this.nodes.filter(isBoundaryNode).map(n => n.id).join(', ')}) {\n`
 			// Channels which are inside component
-			+ (this.channels.length > 0 ? '\t//Channels\n' + this.channels.map(c => `\t${c.toReo(withComment)}`).join('') + '\n' : '')
+			+ (this.channels.length > 0 ? '\t//Channels\n' + this.channels.map(c => `\t${c.toReo ? c.toReo(withComment) : ''}`).join('') + '\n' : '')
 			// Other component's instances which are inside component  // FIXME pass correct ports to instance creation
 			+ (this.components.length > 0 ? '\t//Components\n' + this.components.map(c => `\t${c.toReoInstance(withComment)}`).join('') : '')
 			+ '}\n'
@@ -1735,6 +1772,11 @@ function clearAll() {
 	channels = [];
 	components = [];
 	main = undefined
+	var main = createComponent(25, 25, container.clientWidth - 25, container.clientHeight - 25, 'main');
+	main.set({ id: 'main', evented: false });
+	buttonClick(document.getElementById("select"));
+	updateText();
+	resizeElements();
 }
 
 var main = createComponent(25, 25, container.clientWidth - 25, container.clientHeight - 25, 'main');
@@ -1742,6 +1784,7 @@ main.set({ id: 'main', evented: false });
 buttonClick(document.getElementById("select"));
 updateText();
 resizeElements();
+
 
 // Test
 //createChannel('sync',{x: 100, y: 150},{x: 200, y: 150});
