@@ -827,11 +827,7 @@ void input2CoqCA(FILE *f) {
 					strcat(cond,dataDomain);
 			}
 			fprintf(output,"], %s ,", cond);//erick:traduzir condições pra coq. posso fazer isso diretamente nas funções la em cima.
-<<<<<<< HEAD
-			fprintf(output, " %s);", currentTrans->end->name);
-=======
 			fprintf(output, " %s)]", currentTrans->end->name);
->>>>>>> 03d378a45815e46af8efd876208be5a772dc17f9
 			transitionsForCurrentState = transitionsForCurrentState -> nextTransition;
 		}	
 		currentTrans = transitionsForCurrentState->transition;
