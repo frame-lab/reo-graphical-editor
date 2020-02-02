@@ -1,4 +1,4 @@
-const monaco = require('monaco-editor/esm/vs/editor/editor.api');
+// const monaco = require('monaco-editor/esm/vs/editor/editor.api');
 const fabric = require('fabric').fabric;
 const reoIMonarchLanguage = require('./reo/reo');
 const ReoInterpreter = require('./compiler');
@@ -33,10 +33,10 @@ var splitSelected = 'lightgreen';
 var splitDeselected = 'lightblue';
 
 // Initialize code editor
-monaco.languages.register({ id: 'reo' });
-monaco.languages.setMonarchTokensProvider('reo', reoIMonarchLanguage.language);
-monaco.languages.setLanguageConfiguration('reo', reoIMonarchLanguage.conf);
-const codeEditor = monaco.editor.create(document.getElementById('text'), { language: 'reo' });
+// monaco.languages.register({ id: 'reo' });
+// monaco.languages.setMonarchTokensProvider('reo', reoIMonarchLanguage.language);
+// monaco.languages.setLanguageConfiguration('reo', reoIMonarchLanguage.conf);
+const codeEditor = document.getElementById('text');
 
 async function loadSource(fileName, cb) {
 	let client = new XMLHttpRequest();
@@ -93,8 +93,8 @@ function resizeElements() {
 		canvas.requestRenderAll()
 	}
 
-	if (codeEditor)
-		codeEditor.layout()
+	// if (codeEditor)
+	// 	codeEditor.layout()
 }
 
 document.body.onresize = () => resizeElements();
@@ -184,7 +184,7 @@ async function download(format) {
 			a.href = "data:image/svg+xml;base64," + window.btoa(canvas.toSVG());
 			break;
 		case 'treo':
-			a.href = window.URL.createObjectURL(new Blob([codeEditor.getValue()], { type: "text/plain" }));
+			a.href = window.URL.createObjectURL(new Blob([codeEditor.value], { type: "text/plain" }));
 			break;
 		case 'nuXmvCompact':
 			httpPostAsync('http://127.0.0.1:8081/nuXmv/compact', downloadResponse, 'compactNuXmv.smv');
@@ -213,7 +213,7 @@ document.getElementById("haskellModel").onclick = async () => download('haskellM
 
 function httpPostAsync(theUrl, callback, filename) {
 	var xmlHttp = new XMLHttpRequest();
-	var data = { content: codeEditor.getValue() }
+	var data = { content: codeEditor.value }
 	xmlHttp.onreadystatechange = function () {
 		if (xmlHttp.readyState == 4) {
 			if (this.status !== 200) {
@@ -237,7 +237,7 @@ function httpPostAsync(theUrl, callback, filename) {
 document.getElementById("submit").onclick = async function () {
 	// ReoInterpreter.parse(codeEditor.getValue(), listener);  // FIXME code should not be collected from editor (because of the comment switch)
 	try {
-		let codeLines = codeEditor.getValue().replace(/\t/g, '').split('\n');
+		let codeLines = codeEditor.value.replace(/\t/g, '').split('\n');
 		clearAll();
 		codeLines.forEach(line => {
 			let processedLine = proccesLine(line)
@@ -860,7 +860,7 @@ function isBoundaryNode(node) {
 
 function updateText() {
 	// codeEditor.setValue(components.map(c => c.toReoDefinition(document.getElementById('commentSwitch').checked)).join('\n'))
-	codeEditor.setValue(components.map(c => c.toReoDefinition(true)).join('\n'))
+	codeEditor.value = (components.map(c => c.toReoDefinition(true)).join('\n'))
 }
 
 function snapToComponent(node, comp) {
