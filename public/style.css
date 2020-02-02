@@ -90,6 +90,12 @@ h2 {
 #text {
   width: 100%;
   height: 85%;
+  text-align: left;
+  resize: none;
+  overflow-y: scroll;
+  word-wrap: break-word;
+  overflow-x: visible;
+  padding: 15px 5px 10px 10px;
 }
 
 #refresh {
