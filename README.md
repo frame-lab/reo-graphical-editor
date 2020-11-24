@@ -33,7 +33,7 @@ This sections provides an explanation to the important names in the models.
 ### nuXmv
 - finalAutomata: the MODULE where the final circuit will be represented, so to access the module itself, start from here.
 - time: how time is represented in the model, it increments in steps of one.
-- ports: the variable that instantiantes the *portsModule*, to access the TDS in a specific time, use finalAutomata.ports.<port name>[<time step>]
+- ports: the variable that instantiantes the *portsModule*, to access the TDS in a specific time, use finalAutomata.ports.\<port name\>[\<time step\>]
 - cs: the varibale that represents the current state of a MODULE, to access a state from the circuit use finalAutomata.cs
 
 
