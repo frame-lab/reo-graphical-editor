@@ -83,12 +83,13 @@ struct State *findState(struct StateList *states, char name[600])
     return NULL;
 }
 
-struct Automato *newAutomato(char name[600])
+struct Automato *newAutomato(char name[600], int lineCount)
 {
     struct Automato *automato = (struct Automato *)malloc(sizeof(struct Automato));
     if (automato == NULL)
         return NULL;
     strcpy(automato->name, name);
+    automato->lineCount = lineCount;
     automato->nStates = 0;
     automato->states = NULL;
     return automato;

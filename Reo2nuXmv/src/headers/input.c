@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include "state.h"
 
-struct Automato *createSync(char *ports, int nAuto)
+struct Automato *createSync(char *ports, int nAuto, int lineCount)
 {
     char port1[20];
     char port2[20];
@@ -41,12 +41,12 @@ struct Automato *createSync(char *ports, int nAuto)
     addTransition(transition);
     char *automatoName = (char *)malloc(600 * sizeof(char));
     snprintf(automatoName, 600, "sync%d", nAuto);
-    struct Automato *automato = newAutomato(automatoName);
+    struct Automato *automato = newAutomato(automatoName, lineCount);
     addState(state1, automato);
     return automato;
 }
 
-struct Automato *createLossy(char *ports, int nAuto)
+struct Automato *createLossy(char *ports, int nAuto, int lineCount)
 {
     char port1[20];
     char port2[20];
@@ -95,12 +95,12 @@ struct Automato *createLossy(char *ports, int nAuto)
     addTransition(transition);
     char *automatoName = (char *)malloc(600 * sizeof(char));
     snprintf(automatoName, 600, "lossySync%d", nAuto);
-    struct Automato *automato = newAutomato(automatoName);
+    struct Automato *automato = newAutomato(automatoName, lineCount);
     addState(state1, automato);
     return automato;
 }
 
-struct Automato *createFifo(char *ports, int nAuto)
+struct Automato *createFifo(char *ports, int nAuto, int lineCount)
 {
     char port1[20];
     char port2[20];
@@ -175,14 +175,14 @@ struct Automato *createFifo(char *ports, int nAuto)
     addTransition(transition);
     char *automatoName = (char *)malloc(600 * sizeof(char));
     snprintf(automatoName, 600, "fifo%d", nAuto);
-    struct Automato *automato = newAutomato(automatoName);
+    struct Automato *automato = newAutomato(automatoName, lineCount);
     addState(state1, automato);
     addState(state2, automato);
     addState(state3, automato);
     return automato;
 }
 
-struct Automato *createSyncDrain(char *ports, int nAuto)
+struct Automato *createSyncDrain(char *ports, int nAuto, int lineCount)
 {
     char port1[20];
     char port2[20];
@@ -220,12 +220,12 @@ struct Automato *createSyncDrain(char *ports, int nAuto)
     addTransition(transition);
     char *automatoName = (char *)malloc(600 * sizeof(char));
     snprintf(automatoName, 600, "syncDrain%d", nAuto);
-    struct Automato *automato = newAutomato(automatoName);
+    struct Automato *automato = newAutomato(automatoName, lineCount);
     addState(state1, automato);
     return automato;
 }
 
-struct Automato *createAsync(char *ports, int nAuto)
+struct Automato *createAsync(char *ports, int nAuto, int lineCount)
 {
     char port1[20];
     char port2[20];
@@ -274,12 +274,12 @@ struct Automato *createAsync(char *ports, int nAuto)
     addTransition(transition);
     char *automatoName = (char *)malloc(600 * sizeof(char));
     snprintf(automatoName, 600, "asyncDrain%d", nAuto);
-    struct Automato *automato = newAutomato(automatoName);
+    struct Automato *automato = newAutomato(automatoName, lineCount);
     addState(state1, automato);
     return automato;
 }
 
-struct Automato *createMerger(char *ports, int nAuto)
+struct Automato *createMerger(char *ports, int nAuto, int lineCount)
 {
     char port1[20];
     char port2[20];
@@ -343,12 +343,12 @@ struct Automato *createMerger(char *ports, int nAuto)
     addTransition(transition);
     char *automatoName = (char *)malloc(600 * sizeof(char));
     snprintf(automatoName, 600, "merger%d", nAuto);
-    struct Automato *automato = newAutomato(automatoName);
+    struct Automato *automato = newAutomato(automatoName, lineCount);
     addState(state1, automato);
     return automato;
 }
 
-struct Automato *createReplicator(char *ports, int nAuto)
+struct Automato *createReplicator(char *ports, int nAuto, int lineCount)
 {
     char port1[20];
     char port2[20];
@@ -400,12 +400,12 @@ struct Automato *createReplicator(char *ports, int nAuto)
     addTransition(transition);
     char *automatoName = (char *)malloc(600 * sizeof(char));
     snprintf(automatoName, 600, "replicator%d", nAuto);
-    struct Automato *automato = newAutomato(automatoName);
+    struct Automato *automato = newAutomato(automatoName, lineCount);
     addState(state1, automato);
     return automato;
 }
 
-struct Automato *createFilter(char *ports, int nAuto)
+struct Automato *createFilter(char *ports, int nAuto, int lineCount)
 {
     char port1[20];
     char port2[20];
@@ -455,12 +455,12 @@ struct Automato *createFilter(char *ports, int nAuto)
     addTransition(transition);
     char *automatoName = (char *)malloc(600 * sizeof(char));
     snprintf(automatoName, 600, "filter%d", nAuto);
-    struct Automato *automato = newAutomato(automatoName);
+    struct Automato *automato = newAutomato(automatoName, lineCount);
     addState(state1, automato);
     return automato;
 }
 
-struct Automato *createTransformer(char *ports, int nAuto)
+struct Automato *createTransformer(char *ports, int nAuto, int lineCount)
 {
     char port1[20];
     char port2[20];
@@ -498,7 +498,7 @@ struct Automato *createTransformer(char *ports, int nAuto)
     addTransition(transition);
     char *automatoName = (char *)malloc(600 * sizeof(char));
     snprintf(automatoName, 600, "transformer%d", nAuto);
-    struct Automato *automato = newAutomato(automatoName);
+    struct Automato *automato = newAutomato(automatoName, lineCount);
     addState(state1, automato);
     return automato;
 }
@@ -514,6 +514,7 @@ readInput(FILE *f)
     int i = 0;
     int j = 0;
     int nAuto = 0;
+    int lineCount = 1;
     memset(line, '\0', sizeof(line));
     while (fgets(line, sizeof line, f) != NULL)
     {
@@ -541,58 +542,59 @@ readInput(FILE *f)
         if (strcmp(command, "sync") == 0)
         {
             nAuto++;
-            temp = createSync(ports, nAuto);
+            temp = createSync(ports, nAuto, lineCount);
             automatoList = addAutomato(automatoList, temp);
         }
         if (strcmp(command, "lossysync") == 0)
         {
             nAuto++;
-            temp = createLossy(ports, nAuto);
+            temp = createLossy(ports, nAuto, lineCount);
             automatoList = addAutomato(automatoList, temp);
         }
         if (strcmp(command, "fifo1") == 0)
         {
             nAuto++;
-            temp = createFifo(ports, nAuto);
+            temp = createFifo(ports, nAuto, lineCount);
             automatoList = addAutomato(automatoList, temp);
         }
         if (strcmp(command, "syncdrain") == 0)
         {
             nAuto++;
-            temp = createSyncDrain(ports, nAuto);
+            temp = createSyncDrain(ports, nAuto, lineCount);
             automatoList = addAutomato(automatoList, temp);
         }
         if (strcmp(command, "syncspout") == 0)
         {
             nAuto++;
-            temp = createAsync(ports, nAuto);
+            temp = createAsync(ports, nAuto, lineCount);
             automatoList = addAutomato(automatoList, temp);
         }
         if (strcmp(command, "merger") == 0)
         {
             nAuto++;
-            temp = createMerger(ports, nAuto);
+            temp = createMerger(ports, nAuto, lineCount);
             automatoList = addAutomato(automatoList, temp);
         }
         if (strcmp(command, "replicator") == 0)
         {
             nAuto++;
-            temp = createReplicator(ports, nAuto);
+            temp = createReplicator(ports, nAuto, lineCount);
             automatoList = addAutomato(automatoList, temp);
         }
         if (strcmp(command, "filter") == 0)
         {
             nAuto++;
-            temp = createFilter(ports, nAuto);
+            temp = createFilter(ports, nAuto, lineCount);
             automatoList = addAutomato(automatoList, temp);
         }
         if (strcmp(command, "transformer") == 0)
         {
             nAuto++;
-            temp = createTransformer(ports, nAuto);
+            temp = createTransformer(ports, nAuto, lineCount);
             automatoList = addAutomato(automatoList, temp);
         }
         memset(line, '\0', sizeof(line));
+        lineCount++;
     }
     return automatoList;
 }

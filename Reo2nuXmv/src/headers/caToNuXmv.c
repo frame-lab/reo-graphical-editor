@@ -24,6 +24,10 @@ void caToNuxmv(struct Automato *automato, struct StringList *ports, FILE *f)
     int first = 0;
     struct StringList *statesNames = NULL;
     struct StringList *tempStatesNames = NULL;
+    if (automato->lineCount != 0)
+    {
+        fprintf(f, "--Channel from line %d on the input file\n", automato->lineCount);
+    }
     fprintf(f, "MODULE %s(time)\nVAR\n\tports: ", automato->name);
     fprintf(f, "portsModule;\n");
     fprintf(f, "\tcs: {");
@@ -58,6 +62,7 @@ void caToNuxmv(struct Automato *automato, struct StringList *ports, FILE *f)
     char operation[2];
     operation[1] = '\0';
     int printTrans = 1;
+    int closeTransition = 0;
     while (states != NULL)
     {
         transitions = allTransitions;
@@ -65,21 +70,23 @@ void caToNuxmv(struct Automato *automato, struct StringList *ports, FILE *f)
         tempStatesNames = cpyStringList(tempStatesNames, statesNames);
         tempStatesNames = delString(tempStatesNames, states->state->name);
         second = 0;
+        closeTransition = 0;
         while (transitions != NULL)
         {
             if (transitions->transition->start->name == states->state->name)
                 tempStatesNames = delString(tempStatesNames, transitions->transition->end->name);
-            if (printTrans)
+            if (printTrans && transitions->transition->blocked != 1)
             {
                 fprintf(f, "TRANS\n\t");
                 printTrans = 0;
             }
-            if (transitions->transition->end->name == states->state->name)
+            if (transitions->transition->end->name == states->state->name && transitions->transition->blocked != 1)
             {
                 fprintf(f, "%s(cs = %s & ", second ? "\n\t| " : "(", transitions->transition->start->name);
                 nullPorts(ports, transitions->transition, f);
                 fprintf(f, " %s%s)", transitions->transition->condition, transitions->transition->blocked == 1 ? " & FALSE" : "");
                 second++;
+                closeTransition = 1;
             }
             transitions = transitions->nextTransition;
         }
@@ -99,9 +106,13 @@ void caToNuxmv(struct Automato *automato, struct StringList *ports, FILE *f)
             {
                 fprintf(f, "(next(cs) != %s)%s", tempStatesNames->string, tempStatesNames->nextString != NULL ? " & " : "))");
                 tempStatesNames = tempStatesNames->nextString;
+                closeTransition = 1;
             }
         }
-        fprintf(f, "%s", states->nextState != NULL ? " &\n\t" : ";\n\n");
+        if (closeTransition == 1)
+        {
+            fprintf(f, "%s", states->nextState != NULL ? " &\n\t" : ";\n\n");
+        }
         states = states->nextState;
     }
     if (printTrans)
@@ -376,6 +387,7 @@ void printaAutomatoFinal(struct Automato *automato)
     int time = portsToNuXmv(f, automato->ports) - 1;
     fprintf(f, "MODULE main\nVAR\n\ttime: 0..%d;\n\tautomato: %s(time);\n", time, automato->name);
     fprintf(f, "ASSIGN\n\tinit(time) := 0;\n\tnext(time) := case\n\t\ttime < %d: time + 1;\n\t\tTRUE: time;\nesac;\n\n", time);
+    fprintf(f, "--Final product, corresponding to the full circuit\n");
     caToNuxmv(automato, automato->ports, f);
 
     fclose(f);
@@ -603,7 +615,7 @@ struct AutomatoProdList *productInSmv(struct AutomatoList *automatos, struct Str
             strcpy(concat, "finalAutomata\0");
         else
             snprintf(concat, 6000, "%s%s", components->string, components->nextString->string);
-        automato1 = newAutomato(concat);
+        automato1 = newAutomato(concat, 0);
         automato1->ports = automatoPorts;
         automato1->nPorts = listLength(automatoPorts);
         while (tempStates != NULL)
@@ -623,7 +635,7 @@ struct AutomatoProdList *productInSmv(struct AutomatoList *automatos, struct Str
     }
     return prods;
 }
-void prodToNuxmv(struct AutomatoProd *prod, struct StringList *ports, FILE *f)
+void prodToNuxmv(struct AutomatoProd *prod, struct StringList *ports, FILE *f, int finalAutomata)
 {
     struct Automato *automato = prod->automato;
     struct StateList *states = automato->states;
@@ -631,6 +643,14 @@ void prodToNuxmv(struct AutomatoProd *prod, struct StringList *ports, FILE *f)
     struct StringList *invar = prod->invar;
     struct TransitionList *allTransitions = NULL;
     int first = 0;
+    if (finalAutomata != 1)
+    {
+        fprintf(f, "--Product between %s and %s\n", prod->prod1, prod->prod2);
+    }
+    else
+    {
+        fprintf(f, "--Final product, corresponding to the full circuit\n");
+    }
     fprintf(f, "MODULE %s(time)\nVAR\n\tprod1: %s(time);\n\tprod2: %s(time);\n\tports: ", automato->name, prod->prod1, prod->prod2);
     fprintf(f, "portsModule;\n");
     fprintf(f, "\tcs: {");
@@ -671,7 +691,7 @@ void prodToNuxmv(struct AutomatoProd *prod, struct StringList *ports, FILE *f)
                 fprintf(f, "TRANS\n\t");
                 printTrans = 0;
             }
-            if (transitions->transition->end->name == states->state->name && transitions->transition->blocked != 2)
+            if (transitions->transition->end->name == states->state->name && transitions->transition->blocked == 0)
             {
                 fprintf(f, "%s(cs = %s & ", second ? "\n\t| " : "(", transitions->transition->start->name);
                 nullPorts(ports, transitions->transition, f);
@@ -733,9 +753,15 @@ void startNuxmv(struct AutomatoList *automatos)
         printaAutomatoFinal(automatos->automato);
     while (prodsTemp != NULL)
     {
-        prodToNuxmv(prodsTemp->automato, ports, f);
         if (prodsTemp->nextAutomato == NULL)
+        {
+            prodToNuxmv(prodsTemp->automato, ports, f, 1);
             printaAutomatoFinal(prodsTemp->automato->automato);
+        }
+        else
+        {
+            prodToNuxmv(prodsTemp->automato, ports, f, 0);
+        }
         prodsTemp = prodsTemp->nextAutomato;
     }
     delStringList(ports);

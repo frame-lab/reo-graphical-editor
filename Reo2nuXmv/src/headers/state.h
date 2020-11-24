@@ -8,6 +8,7 @@ struct Automato
     struct StateList *states;
     int nPorts;
     struct StringList *ports;
+    int lineCount;
 };
 
 struct AutomatoProd
@@ -86,7 +87,7 @@ void addTransition(struct Transition *transition);
 
 void delState(struct State *state);
 
-struct Automato *newAutomato(char name[20]);
+struct Automato *newAutomato(char name[600], int lineCount);
 
 void addState(struct State *state, struct Automato *automato);
 
