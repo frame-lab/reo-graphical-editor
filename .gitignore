@@ -2,6 +2,14 @@
 node_modules/
 *.log
 *.bundle.js
+*.o
+*.smv
 editor.worker.js
 .vscode/ipch/240b96fac98ff307/main.ipch
 .vscode/*
+
+CACoq/reo2CACoq
+CACoq/reo2CACoqHs
+Reo2nuXmv/input.txt
+Reo2nuXmv/reo2nuXmv
+package-lock.json
