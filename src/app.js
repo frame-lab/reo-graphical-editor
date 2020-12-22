@@ -626,6 +626,20 @@ function completeChannelCreation(channel, node1, node2, manual) {
     }\n`;
   };
 
+  channel.toArgument = function () {
+    let code = codeEditor.getValue();
+    let argumentHeader = `\t${this.name}(${this.node1.label.text}, ${this.node2.label.text})\{`;
+    let argumentStart = code.indexOf(argumentHeader);
+    let argument =
+      argumentStart > -1
+        ? code.substring(
+            argumentStart + argumentHeader.length,
+            code.indexOf("}", argumentStart)
+          )
+        : "";
+    return argumentHeader + argument + "}\n";
+  };
+
   // calculate the relation matrix between the channel component and the reference rectangle
   // then save it as a channel component property
   const bossTransform = channel.parts[0].calcTransformMatrix();
@@ -1984,7 +1998,20 @@ function createComponent(x1, y1, x2, y2, name, manual) {
             .map((c) => `\t${c.toReoInstance(withComment)}`)
             .join("")
         : "") +
-      "}\n"
+      "}\n" +
+      (this.channels.length > 0
+        ? this.channels
+            .map(
+              (c) =>
+                `${
+                  c.toReo &&
+                  (c.name === "timer" || c.name === "timedtransformer")
+                    ? c.toArgument()
+                    : ""
+                }`
+            )
+            .join("") + "\n"
+        : "")
     );
   };
 

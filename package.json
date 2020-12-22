@@ -1,29 +1,30 @@
 {
-	"name": "reo-graphical-editor",
-	"version": "0.1.0",
-	"scripts": {
-		"build:prod": "cross-env NODE_ENV=production webpack",
-		"build:dev": "webpack",
-		"start": "node src/server.js"
-	},
-	"dependencies": {
-		"antlr4": "^4.7.2",
-		"archiver": "^3.0.0",
-		"fabric": "^2.6.0",
-		"http-server": "^0.11.1",
-		"monaco-editor": "^0.15.6"
-	},
-	"devDependencies": {
-		"cross-env": "^5.2.0",
-		"monaco-editor-webpack-plugin": "^1.7.0",
-		"css-loader": "^2.1.0",
-		"style-loader": "^0.23.1",
-		"terser-webpack-plugin": "^1.2.2",
-		"webpack": "^4.29.3",
-		"webpack-cli": "^3.2.3"
-	},
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/ReoLanguage/reo-graphical-editor.git"
-	}
+  "name": "reo-graphical-editor",
+  "version": "0.1.0",
+  "scripts": {
+    "build:prod": "cross-env NODE_ENV=production webpack",
+    "build:dev": "webpack",
+    "start": "node src/server.js",
+    "local": "make && node src/server.js"
+  },
+  "dependencies": {
+    "antlr4": "^4.7.2",
+    "archiver": "^3.0.0",
+    "fabric": "^2.6.0",
+    "http-server": "^0.11.1",
+    "monaco-editor": "^0.15.6"
+  },
+  "devDependencies": {
+    "cross-env": "^5.2.0",
+    "monaco-editor-webpack-plugin": "^1.7.0",
+    "css-loader": "^2.1.0",
+    "style-loader": "^0.23.1",
+    "terser-webpack-plugin": "^1.2.2",
+    "webpack": "^4.29.3",
+    "webpack-cli": "^3.2.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ReoLanguage/reo-graphical-editor.git"
+  }
 }
