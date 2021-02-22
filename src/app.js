@@ -295,7 +295,9 @@ document.getElementById("submit").onclick = async function () {
         createChannel(
           processedLine.name,
           processedLine.node1,
-          processedLine.node2
+          processedLine.node2,
+          undefined,
+          processedLine.arg
         );
       }
     });
@@ -311,6 +313,7 @@ function proccesLine(line) {
   let name = line.substring(0, linePos).trim();
   if (name === "main") return null;
   let node1 = {};
+  let arg = line.substring(line.indexOf("[") + 1, line.indexOf(";"));
   let linePos2 = line.indexOf(",");
   node1.name = line.substring(linePos + 1, linePos2).trim();
   linePos = linePos2 + 1;
@@ -318,20 +321,20 @@ function proccesLine(line) {
   let node2 = {};
   node2.name = line.substring(linePos, linePos2).trim();
   line = line.substring(linePos2 + 1);
-  linePos = line.indexOf("[") + 1;
+  linePos = line.indexOf("<") + 1;
   linePos2 = line.indexOf(",");
   node1.x = parseInt(line.substring(linePos, linePos2).trim());
   linePos = linePos2 + 1;
-  linePos2 = line.indexOf("]");
+  linePos2 = line.indexOf(">");
   node1.y = parseInt(line.substring(linePos, linePos2).trim());
   line = line.substring(linePos2 + 2);
-  linePos = line.indexOf("[") + 1;
+  linePos = line.indexOf("<") + 1;
   linePos2 = line.indexOf(",");
   node2.x = parseInt(line.substring(linePos, linePos2).trim());
   linePos = linePos2 + 1;
-  linePos2 = line.indexOf("]");
+  linePos2 = line.indexOf(">");
   node2.y = parseInt(line.substring(linePos, linePos2).trim());
-  return { name: name, node1: node1, node2: node2 };
+  return { name: name, node1: node1, node2: node2, arg: arg };
 }
 
 // document.getElementById("commentSwitch").onclick = function () {
@@ -405,9 +408,9 @@ const Node = fabric.util.createClass(fabric.Circle, {
   },
 
   generatePosition: function () {
-    return `pos(${this.label.text}): [${Math.round(this.left)}, ${Math.round(
+    return `pos(${this.label.text}): <${Math.round(this.left)}, ${Math.round(
       this.top
-    )}]`;
+    )}>`;
   },
 }); // Node
 
@@ -510,7 +513,7 @@ function createAnchor(left, top) {
  * @param {boolean} [manual] - optional flag to indicate the function was initiated by a user action
  * @returns {{class: string, parts: Array}}
  */
-function createChannel(type, node1, node2, manual) {
+function createChannel(type, node1, node2, manual, arg) {
   let channel,
     i,
     validChannel = false;
@@ -522,6 +525,8 @@ function createChannel(type, node1, node2, manual) {
       validChannel = true;
     }
   if (!validChannel) throw new Error("Channel type " + type + " is invalid");
+
+  channel.arg = arg;
 
   fabric.util.enlivenObjects(
     channel.parts,
@@ -621,7 +626,25 @@ function completeChannelCreation(channel, node1, node2, manual) {
   };
 
   channel.toReo = function (withComment) {
-    return `${this.name}(${this.node1.label.text}, ${this.node2.label.text})${
+    let code = codeEditor.getValue();
+    let argumentHeader = `${this.name}(${this.node1.label.text}, ${this.node2.label.text})`;
+    if (this.name === "timer" || this.name === "timedtransformer") {
+      let argumentStart = code.indexOf(argumentHeader);
+      let argument =
+        argumentStart > -1
+          ? code.substring(
+              argumentStart + argumentHeader.length + 1,
+              code.indexOf(";", argumentStart)
+            )
+          : "";
+      if ((argument === "" || argument === "TRUE") && this.arg) {
+        argument = this.arg;
+      }
+      return `${argumentHeader}[${argument ? argument : "TRUE"};]${
+        withComment ? this.generatePositionMetadata() : ""
+      }\n`;
+    }
+    return `${argumentHeader}${
       withComment ? this.generatePositionMetadata() : ""
     }\n`;
   };
@@ -1970,11 +1993,11 @@ function createComponent(x1, y1, x2, y2, name, manual) {
 	canvas.add(options, balloon);*/
 
   component.generatePositionMetadata = function () {
-    return ` /*! pos(${this.id}): [${Math.round(this.left)}, ${Math.round(
+    return ` /*! pos(${this.id}): <${Math.round(this.left)}, ${Math.round(
       this.top
     )}, ${Math.round(this.left + this.width)}, ${Math.round(
       this.top + this.height
-    )}] !*/`;
+    )}> !*/`;
   };
 
   component.toReoDefinition = function (withComment) {
@@ -1998,20 +2021,21 @@ function createComponent(x1, y1, x2, y2, name, manual) {
             .map((c) => `\t${c.toReoInstance(withComment)}`)
             .join("")
         : "") +
-      "}\n" +
-      (this.channels.length > 0
-        ? this.channels
-            .map(
-              (c) =>
-                `${
-                  c.toReo &&
-                  (c.name === "timer" || c.name === "timedtransformer")
-                    ? c.toArgument()
-                    : ""
-                }`
-            )
-            .join("") + "\n"
-        : "")
+      "}\n"
+      // +
+      // (this.channels.length > 0
+      //   ? this.channels
+      //       .map(
+      //         (c) =>
+      //           `${
+      //             c.toReo &&
+      //             (c.name === "timer" || c.name === "timedtransformer")
+      //               ? c.toArgument()
+      //               : ""
+      //           }`
+      //       )
+      //       .join("") + "\n"
+      //   : "")
     );
   };
 
