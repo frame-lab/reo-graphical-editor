@@ -424,7 +424,7 @@ void printTransition(struct Transition *transition)
 {
     printf("%s->%s %d\n", transition->start->name, transition->end->name, transition->nPorts);
     printsList(transition->ports);
-    printf("%s\n------------------------------------\n", transition->condition);
+    printf("%s ##### %s\n------------------------------------\n", transition->condition, transition->add);
 }
 
 void printTransitions(struct TransitionList *transisitions)
@@ -450,6 +450,7 @@ void printAutomato(struct Automato *automato)
     printf("-----States: %d-----\n", automato->nStates);
     struct StateList *states = automato->states;
     printStateList(automato->states);
+    printf("-----Add: %s-----\n", automato->add);
 }
 
 void printStateList(struct StateList *states)

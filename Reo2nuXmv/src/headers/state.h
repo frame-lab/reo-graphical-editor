@@ -9,6 +9,7 @@ struct Automato
     int nPorts;
     struct StringList *ports;
     int lineCount;
+    char *add;
 };
 
 struct AutomatoProd
@@ -36,6 +37,7 @@ struct Transition
     struct StringList *ports;
     char *condition;
     int blocked;
+    char* add;
 };
 
 struct Condition

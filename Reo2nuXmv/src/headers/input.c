@@ -16,7 +16,7 @@ struct Automato *createSync(char *ports, int nAuto, int lineCount)
         i++;
     }
     i++;
-    while (ports[i] != ')')
+    while (ports[i] != ')' && ports[i] != '\0')
     {
         if (ports[i] != ' ')
         {
@@ -59,7 +59,7 @@ struct Automato *createLossy(char *ports, int nAuto, int lineCount)
         i++;
     }
     i++;
-    while (ports[i] != ')')
+    while (ports[i] != ')' && ports[i] != '\0')
     {
         if (ports[i] != ' ')
         {
@@ -113,7 +113,7 @@ struct Automato *createFifo(char *ports, int nAuto, int lineCount)
         i++;
     }
     i++;
-    while (ports[i] != ')')
+    while (ports[i] != ')' && ports[i] != '\0')
     {
         if (ports[i] != ' ')
         {
@@ -195,7 +195,7 @@ struct Automato *createSyncDrain(char *ports, int nAuto, int lineCount)
         i++;
     }
     i++;
-    while (ports[i] != ')')
+    while (ports[i] != ')' && ports[i] != '\0')
     {
         if (ports[i] != ' ')
         {
@@ -238,7 +238,7 @@ struct Automato *createAsync(char *ports, int nAuto, int lineCount)
         i++;
     }
     i++;
-    while (ports[i] != ')')
+    while (ports[i] != ')' && ports[i] != '\0')
     {
         if (ports[i] != ' ')
         {
@@ -305,7 +305,7 @@ struct Automato *createMerger(char *ports, int nAuto, int lineCount)
     }
     i++;
     j = 0;
-    while (ports[i] != ')')
+    while (ports[i] != ')' && ports[i] != '\0')
     {
         if (ports[i] != ' ')
         {
@@ -374,7 +374,7 @@ struct Automato *createReplicator(char *ports, int nAuto, int lineCount)
     }
     i++;
     j = 0;
-    while (ports[i] != ')')
+    while (ports[i] != ')' && ports[i] != '\0')
     {
         if (ports[i] != ' ')
         {
@@ -418,7 +418,7 @@ struct Automato *createFilter(char *ports, int nAuto, int lineCount)
         i++;
     }
     i++;
-    while (ports[i] != ')')
+    while (ports[i] != ')' && ports[i] != '\0')
     {
         if (ports[i] != ' ')
         {
@@ -473,7 +473,7 @@ struct Automato *createTransformer(char *ports, int nAuto, int lineCount)
         i++;
     }
     i++;
-    while (ports[i] != ')')
+    while (ports[i] != ')' && ports[i] != '\0')
     {
         if (ports[i] != ' ')
         {
@@ -502,6 +502,137 @@ struct Automato *createTransformer(char *ports, int nAuto, int lineCount)
     addState(state1, automato);
     return automato;
 }
+struct Automato *createTimer(char *ports, int nAuto, int lineCount, char *param)
+{
+    char port1[20];
+    char port2[20];
+    memset(port1, 0, sizeof(port1));
+    memset(port2, 0, sizeof(port2));
+    int i = 0, j = 0;
+    while (ports[i] != ',')
+    {
+        port1[i] = ports[i];
+        i++;
+    }
+    i++;
+    while (ports[i] != ')' && ports[i] != '\0')
+    {
+        if (ports[i] != ' ')
+        {
+            port2[j] = ports[i];
+            j++;
+        }
+        i++;
+    }
+    char varInicial[]= "5" ;
+    struct State *state1 = newState("q0", 1);
+    struct State *state2 = newState("p0", 0);
+    char *condition = (char *)malloc(600 * sizeof(char));
+    char *add = (char *)malloc(600 * sizeof(char));
+    struct StringList *portsList = NULL;
+    portsList = addString(portsList, port1);
+    snprintf(condition, 600, "ports.%s[time] != NULL", port1);
+    snprintf(add, 600, " & next(data) = ports.%s[time] & next(var) = %s", port1, varInicial);
+    struct Transition *transition = (struct Transition *)malloc(sizeof(struct Transition));
+    transition->start = state1;
+    transition->end = state2;
+    transition->nPorts = 1;
+    transition->ports = portsList;
+    transition->condition = condition;
+    transition->blocked = 0;
+    transition->add = add;
+    addTransition(transition);
+    condition = (char *)malloc(600 * sizeof(char));
+    add = (char *)malloc(600 * sizeof(char));
+    portsList = NULL;
+    portsList = addString(portsList, port2);
+    snprintf(condition, 600, "ports.%s[time] = data & var = 0", port2);
+    snprintf(add, 600, " & next(data) = NULL");
+    transition = (struct Transition *)malloc(sizeof(struct Transition));
+    transition->start = state2;
+    transition->end = state1;
+    transition->nPorts = 1;
+    transition->ports = portsList;
+    transition->condition = condition;
+    transition->blocked = 0;
+    transition->add = add;
+    addTransition(transition);
+    char *automatoName = (char *)malloc(600 * sizeof(char));
+    snprintf(automatoName, 600, "timer%d", nAuto);
+    struct Automato *automato = newAutomato(automatoName, lineCount);
+    addState(state1, automato);
+    addState(state2, automato);
+    add = (char *)malloc(1024 * sizeof(char));
+    snprintf(add, 1024, "var > 0 <-> next(var) = (%s)", param);
+    automato->add = add;
+    return automato;
+}
+
+struct Automato *createTimedTransformer(char *ports, int nAuto, int lineCount, char *param)
+{
+    char port1[20];
+    char port2[20];
+    memset(port1, 0, sizeof(port1));
+    memset(port2, 0, sizeof(port2));
+    int i = 0, j = 0;
+    while (ports[i] != ',')
+    {
+        port1[i] = ports[i];
+        i++;
+    }
+    i++;
+    while (ports[i] != ')' && ports[i] != '\0')
+    {
+        if (ports[i] != ' ')
+        {
+            port2[j] = ports[i];
+            j++;
+        }
+        i++;
+    }
+    char varInicial[]= "5" ;
+    struct State *state1 = newState("q0", 1);
+    struct State *state2 = newState("p0", 0);
+    char *condition = (char *)malloc(600 * sizeof(char));
+    char *add = (char *)malloc(600 * sizeof(char));
+    struct StringList *portsList = NULL;
+    portsList = addString(portsList, port1);
+    snprintf(condition, 600, "ports.%s[time] != NULL", port1);
+    snprintf(add, 600, " & next(var) = ports.%s[time]", port1);
+    struct Transition *transition = (struct Transition *)malloc(sizeof(struct Transition));
+    transition->start = state1;
+    transition->end = state2;
+    transition->nPorts = 1;
+    transition->ports = portsList;
+    transition->condition = condition;
+    transition->blocked = 0;
+    transition->add = add;
+    addTransition(transition);
+    condition = (char *)malloc(600 * sizeof(char));
+    add = (char *)malloc(600 * sizeof(char));
+    portsList = NULL;
+    portsList = addString(portsList, port2);
+    snprintf(condition, 600, "ports.%s[time] = var & var > %s", port2, varInicial);
+    snprintf(add, 600, " & next(var) = 0");
+    transition = (struct Transition *)malloc(sizeof(struct Transition));
+    transition->start = state2;
+    transition->end = state1;
+    transition->nPorts = 1;
+    transition->ports = portsList;
+    transition->condition = condition;
+    transition->blocked = 0;
+    transition->add = add;
+    addTransition(transition);
+    char *automatoName = (char *)malloc(600 * sizeof(char));
+    snprintf(automatoName, 600, "timer%d", nAuto);
+    struct Automato *automato = newAutomato(automatoName, lineCount);
+    addState(state1, automato);
+    addState(state2, automato);
+    add = (char *)malloc(1024 * sizeof(char));
+    snprintf(add, 1024, "var > %s <-> next(var) = (%s)", varInicial, param);
+    automato->add = add;
+    return automato;
+}
 
 struct AutomatoList *
 readInput(FILE *f)
@@ -511,6 +642,7 @@ readInput(FILE *f)
     char line[1024];
     char command[1024];
     char ports[1024];
+    char param[1024];
     int i = 0;
     int j = 0;
     int nAuto = 0;
@@ -522,6 +654,7 @@ readInput(FILE *f)
         j = 0;
         memset(command, '\0', sizeof(command));
         memset(ports, '\0', sizeof(ports));
+        memset(param, '\0', sizeof(param));
         while (line[i] != '(' && line[i] != '\n' && line[i] != '\0' && line[i] != '/')
         {
             if (line[i] != '\t')
@@ -533,12 +666,18 @@ readInput(FILE *f)
         }
         i++;
         j = 0;
-        while ((line[i] != '\n') && (line[i] != '\0') && line[i] != '/')
+        while ((line[i] != ')') && (line[i] != '\n') && (line[i] != '\0') && line[i] != '/')
         {
             ports[j] = line[i];
             i++;
             j++;
         }
+        j = 0;
+        while ((line[i] != '[') && (line[i] != '\n') && (line[i] != '\0') && line[i] != '/')
+        {
+            i++;
+        }
+        i++;
         if (strcmp(command, "sync") == 0)
         {
             nAuto++;
@@ -591,6 +730,32 @@ readInput(FILE *f)
         {
             nAuto++;
             temp = createTransformer(ports, nAuto, lineCount);
+            automatoList = addAutomato(automatoList, temp);
+        }
+        if (strcmp(command, "timer") == 0)
+        {
+            while ((line[i] != ';') && (line[i] != '\n') && (line[i] != '\0') && line[i] != '/')
+            {
+                param[j] = line[i];
+                i++;
+                j++;
+            }
+            printf("timer %s\n", ports);
+            nAuto++;
+            temp = createTimer(ports, nAuto, lineCount, param);
+            automatoList = addAutomato(automatoList, temp);
+        }
+        if (strcmp(command, "timedtransformer") == 0)
+        {
+            while ((line[i] != ';') && (line[i] != '\n') && (line[i] != '\0') && line[i] != '/')
+            {
+                param[j] = line[i];
+                i++;
+                j++;
+            }
+            printf("timedtransformer %s\n", ports);
+            nAuto++;
+            temp = createTimedTransformer(ports, nAuto, lineCount, param);
             automatoList = addAutomato(automatoList, temp);
         }
         memset(line, '\0', sizeof(line));
