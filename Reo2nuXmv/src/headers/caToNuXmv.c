@@ -415,6 +415,7 @@ struct AutomatoProdList *productInSmv(struct AutomatoList *automatos, struct Str
     struct Automato *automato2;
     char *concat = (char *)malloc(8000 * sizeof(char));
     char *tempCondition = NULL;
+    char *tempAdd = NULL;
     char *transString = (char *)malloc(12000 * sizeof(char));
     struct StringList *intersection1 = NULL;
     struct StringList *intersection2 = NULL;
@@ -505,6 +506,7 @@ struct AutomatoProdList *productInSmv(struct AutomatoList *automatos, struct Str
                         tempTransition->nPorts = transitions1->transition->nPorts;
                         tempTransition->ports = transitions1->transition->ports;
                         tempTransition->condition = transitions1->transition->condition;
+                        tempTransition->add = transitions1->transition->add;
                         tempTransition->blocked = 2;
                         addTransition(tempTransition);
                     }
@@ -528,6 +530,7 @@ struct AutomatoProdList *productInSmv(struct AutomatoList *automatos, struct Str
                                 tempTransition->nPorts = transitions2->transition->nPorts;
                                 tempTransition->ports = transitions2->transition->ports;
                                 tempTransition->condition = transitions2->transition->condition;
+                                tempTransition->add = transitions2->transition->add;
                                 tempTransition->blocked = 2;
                                 addTransition(tempTransition);
                             }
@@ -562,6 +565,9 @@ struct AutomatoProdList *productInSmv(struct AutomatoList *automatos, struct Str
                             tempCondition = (char *)malloc(6000 * sizeof(char));
                             snprintf(tempCondition, 6000, "%s & %s", transitions1->transition->condition, transitions2->transition->condition);
                             tempTransition->condition = tempCondition;
+                            tempAdd = (char *)malloc(6000 * sizeof(char));
+                            snprintf(tempAdd, 6000, "%s & %s", transitions1->transition->add, transitions2->transition->add);
+                            tempTransition->add = tempAdd;
                             addTransition(tempTransition);
                         }
                         transitions2 = transitions2->nextTransition;
@@ -586,6 +592,7 @@ struct AutomatoProdList *productInSmv(struct AutomatoList *automatos, struct Str
                             tempTransition->nPorts = transitions2->transition->nPorts;
                             tempTransition->ports = transitions2->transition->ports;
                             tempTransition->condition = transitions2->transition->condition;
+                            tempTransition->add = transitions2->transition->add;
                             tempTransition->blocked = 2;
                             addTransition(tempTransition);
                         }
@@ -611,6 +618,8 @@ struct AutomatoProdList *productInSmv(struct AutomatoList *automatos, struct Str
             }
             states1 = states1->nextState;
         }
+        tempAdd = (char *)malloc(6000 * sizeof(char));
+        snprintf(tempAdd, 6000, "%s & %s", automato1->add, automato2->add);
         if (automatos->nextAutomato->nextAutomato == NULL)
             strcpy(concat, "finalAutomata\0");
         else
@@ -618,6 +627,7 @@ struct AutomatoProdList *productInSmv(struct AutomatoList *automatos, struct Str
         automato1 = newAutomato(concat, 0);
         automato1->ports = automatoPorts;
         automato1->nPorts = listLength(automatoPorts);
+        automato1->add = tempAdd;
         while (tempStates != NULL)
         {
             addStateWithoutPorts(tempStates->state, automato1);
@@ -702,7 +712,8 @@ void prodToNuxmv(struct AutomatoProd *prod, struct StringList *ports, FILE *f, i
         }
         if (second)
         {
-            fprintf(f, " <-> next(cs) = %s)%s", states->state->name, states->nextState ? " &\n\t" : inalcStates ? " &\n\t" : ";\n");
+            fprintf(f, " <-> next(cs) = %s)%s", states->state->name, states->nextState ? " &\n\t" : inalcStates ? " &\n\t"
+                                                                                                                : ";\n");
         }
         states = states->nextState;
     }

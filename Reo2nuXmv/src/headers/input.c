@@ -524,7 +524,7 @@ struct Automato *createTimer(char *ports, int nAuto, int lineCount, char *param)
         }
         i++;
     }
-    char varInicial[]= "5" ;
+    char varInicial[] = "5";
     struct State *state1 = newState("q0", 1);
     struct State *state2 = newState("p0", 0);
     char *condition = (char *)malloc(600 * sizeof(char));
@@ -590,7 +590,7 @@ struct Automato *createTimedTransformer(char *ports, int nAuto, int lineCount, c
         }
         i++;
     }
-    char varInicial[]= "5" ;
+    char varInicial[] = "5";
     struct State *state1 = newState("q0", 1);
     struct State *state2 = newState("p0", 0);
     char *condition = (char *)malloc(600 * sizeof(char));
@@ -624,7 +624,7 @@ struct Automato *createTimedTransformer(char *ports, int nAuto, int lineCount, c
     transition->add = add;
     addTransition(transition);
     char *automatoName = (char *)malloc(600 * sizeof(char));
-    snprintf(automatoName, 600, "timer%d", nAuto);
+    snprintf(automatoName, 600, "timedtransformer%d", nAuto);
     struct Automato *automato = newAutomato(automatoName, lineCount);
     addState(state1, automato);
     addState(state2, automato);
@@ -740,7 +740,6 @@ readInput(FILE *f)
                 i++;
                 j++;
             }
-            printf("timer %s\n", ports);
             nAuto++;
             temp = createTimer(ports, nAuto, lineCount, param);
             automatoList = addAutomato(automatoList, temp);
@@ -753,7 +752,6 @@ readInput(FILE *f)
                 i++;
                 j++;
             }
-            printf("timedtransformer %s\n", ports);
             nAuto++;
             temp = createTimedTransformer(ports, nAuto, lineCount, param);
             automatoList = addAutomato(automatoList, temp);
