@@ -488,16 +488,16 @@ Module ConstraintAutomata.
     Definition portsOfTransition (ca: constraintAutomata) (s : state) :=
       retrievePortsFromRespTransitions (ConstraintAutomata.T ca s).
 
-  (* We define acceptance for infinite runs as Baier et al. propose
-  Terminar melhor essa definição: talvez realmente meter a noção de aceitação de baier et al.*)
+  (* We define acceptance for infinite runs as Baier et al. propose *)
 
-  Definition accepting (ca: constraintAutomata) (theta: set tds) : Prop :=
-    forall k, forall final, In (final) (lastReachedStates ca theta k) -> (*/\ *)
-                        exists t, In t (step' (tdsDerivate ca theta k (ConstraintAutomata.Q0 ca)) (*(theta : set tds) *)
-                        (thetaN (tdsDerivate ca theta k (ConstraintAutomata.Q0 ca)))(*portNames: set name*)
-                        ((ConstraintAutomata.T ca final))) . (*transitions : set(set name * DC name data * state))*) 
+  Definition rejecting (ca: constraintAutomata) (theta: set tds) : Prop :=
+    exists k, (lastReachedStates ca theta k) = [].
 
+  Definition calcIndex (k: nat) (p : tds) := mktds (id p) (dataAssignment p) (timeStamp p)
+        (tdsCond p) (k).
 
+  Definition accepting' (ca: constraintAutomata) (theta: set tds) :=
+    forall q,forall k, stepAux ca (map(calcIndex k) (theta)) (thetaN (map(calcIndex k) (theta))) q <> [].
 
   (* Bisimulation as boolean verification *)
 
@@ -508,6 +508,7 @@ Module ConstraintAutomata.
     | [] => [] 
     | a::t => if (set_eq portNames (fst(fst(a)))) then a::getTransition portNames t else getTransition portNames t
     end. 
+
 
   (* We need to evalate whether the next reached states are also equivalent. Then, we need to store *)
   (* pairs of states to be evaluated *)
