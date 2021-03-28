@@ -532,7 +532,7 @@ struct Automato *createTimer(char *ports, int nAuto, int lineCount, char *param)
     struct StringList *portsList = NULL;
     portsList = addString(portsList, port1);
     snprintf(condition, 600, "ports.%s[time] != NULL", port1);
-    snprintf(add, 600, " & next(data) = ports.%s[time] & next(var) = %s", port1, varInicial);
+    snprintf(add, 600, " & next( data ) = ports.%s[time] & next( var ) = %s", port1, varInicial);
     struct Transition *transition = (struct Transition *)malloc(sizeof(struct Transition));
     transition->start = state1;
     transition->end = state2;
@@ -547,7 +547,7 @@ struct Automato *createTimer(char *ports, int nAuto, int lineCount, char *param)
     portsList = NULL;
     portsList = addString(portsList, port2);
     snprintf(condition, 600, "ports.%s[time] = data & var = 0", port2);
-    snprintf(add, 600, " & next(data) = NULL");
+    snprintf(add, 600, " & next( data ) = NULL");
     transition = (struct Transition *)malloc(sizeof(struct Transition));
     transition->start = state2;
     transition->end = state1;
@@ -563,7 +563,7 @@ struct Automato *createTimer(char *ports, int nAuto, int lineCount, char *param)
     addState(state1, automato);
     addState(state2, automato);
     add = (char *)malloc(1024 * sizeof(char));
-    snprintf(add, 1024, "var > 0 <-> next(var) = (%s)", param);
+    snprintf(add, 1024, "var > 0 <-> next( var ) = (%s)", param);
     automato->add = add;
     return automato;
 }
@@ -598,7 +598,7 @@ struct Automato *createTimedTransformer(char *ports, int nAuto, int lineCount, c
     struct StringList *portsList = NULL;
     portsList = addString(portsList, port1);
     snprintf(condition, 600, "ports.%s[time] != NULL", port1);
-    snprintf(add, 600, " & next(var) = ports.%s[time]", port1);
+    snprintf(add, 600, " & next( var ) = ports.%s[time]", port1);
     struct Transition *transition = (struct Transition *)malloc(sizeof(struct Transition));
     transition->start = state1;
     transition->end = state2;
@@ -613,7 +613,7 @@ struct Automato *createTimedTransformer(char *ports, int nAuto, int lineCount, c
     portsList = NULL;
     portsList = addString(portsList, port2);
     snprintf(condition, 600, "ports.%s[time] = var & var > %s", port2, varInicial);
-    snprintf(add, 600, " & next(var) = 0");
+    snprintf(add, 600, " & next( var ) = 0");
     transition = (struct Transition *)malloc(sizeof(struct Transition));
     transition->start = state2;
     transition->end = state1;
@@ -629,7 +629,7 @@ struct Automato *createTimedTransformer(char *ports, int nAuto, int lineCount, c
     addState(state1, automato);
     addState(state2, automato);
     add = (char *)malloc(1024 * sizeof(char));
-    snprintf(add, 1024, "var > %s <-> next(var) = (%s)", varInicial, param);
+    snprintf(add, 1024, "var > %s <-> next( var ) = (%s)", varInicial, param);
     automato->add = add;
     return automato;
 }

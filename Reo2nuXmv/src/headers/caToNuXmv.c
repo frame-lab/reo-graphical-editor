@@ -84,7 +84,7 @@ void caToNuxmv(struct Automato *automato, struct StringList *ports, FILE *f)
             {
                 fprintf(f, "%s(cs = %s & ", second ? "\n\t| " : "(", transitions->transition->start->name);
                 nullPorts(ports, transitions->transition, f);
-                fprintf(f, " %s%s)", transitions->transition->condition, transitions->transition->blocked == 1 ? " & FALSE" : "");
+                fprintf(f, " %s%s%s)", transitions->transition->condition, transitions->transition->add, transitions->transition->blocked == 1 ? " & FALSE" : "");
                 second++;
                 closeTransition = 1;
             }
@@ -111,7 +111,14 @@ void caToNuxmv(struct Automato *automato, struct StringList *ports, FILE *f)
         }
         if (closeTransition == 1)
         {
-            fprintf(f, "%s", states->nextState != NULL ? " &\n\t" : ";\n\n");
+            if (automato->add != NULL & states->nextState == NULL)
+            {
+                fprintf(f, "\n\t& (%s);\n\n", automato->add);
+            }
+            else
+            {
+                fprintf(f, "%s", states->nextState != NULL ? " &\n\t" : ";\n\n");
+            }
         }
         states = states->nextState;
     }
@@ -409,6 +416,54 @@ char *nullPortsToString(struct StringList *portsAutomato, struct StringList *por
     return nullPortsString;
 }
 
+char **tokenize(const char *str)
+{
+    int count = 0;
+    int capacity = 10;
+    char **result = malloc(capacity * sizeof(*result));
+
+    const char *e = str;
+
+    if (e)
+        do
+        {
+            const char *s = e;
+            e = strpbrk(s, " ");
+
+            if (count >= capacity)
+                result = realloc(result, (capacity *= 2) * sizeof(*result));
+
+            result[count++] = e ? strndup(s, e - s) : strdup(s);
+        } while (e && *(++e));
+
+    if (count >= capacity)
+        result = realloc(result, (capacity += 1) * sizeof(*result));
+    result[count++] = 0;
+
+    return result;
+}
+
+char *addToProdAdd(char *add, char *prod)
+{
+    char *prodAdd = (char *)malloc(600 * sizeof(char));
+    stpncpy(prodAdd, "\0", 1);
+    char **tokens = tokenize(add);
+    char **it;
+    for (it = tokens; it && *it; ++it)
+    {
+        if (strcmp(*it, "var") == 0 || strcmp(*it, "data") == 0)
+        {
+            strcat(prodAdd, prod);
+            strcat(prodAdd, ".");
+        }
+        strcat(prodAdd, *it);
+        strcat(prodAdd, " ");
+        free(*it);
+    }
+    free(tokens);
+    return prodAdd;
+}
+
 struct AutomatoProdList *productInSmv(struct AutomatoList *automatos, struct StringList *ports, FILE *f)
 {
     struct Automato *automato1 = automatos->automato;
@@ -506,7 +561,7 @@ struct AutomatoProdList *productInSmv(struct AutomatoList *automatos, struct Str
                         tempTransition->nPorts = transitions1->transition->nPorts;
                         tempTransition->ports = transitions1->transition->ports;
                         tempTransition->condition = transitions1->transition->condition;
-                        tempTransition->add = transitions1->transition->add;
+                        tempTransition->add = addToProdAdd(transitions1->transition->add, "prod1");
                         tempTransition->blocked = 2;
                         addTransition(tempTransition);
                     }
@@ -530,7 +585,7 @@ struct AutomatoProdList *productInSmv(struct AutomatoList *automatos, struct Str
                                 tempTransition->nPorts = transitions2->transition->nPorts;
                                 tempTransition->ports = transitions2->transition->ports;
                                 tempTransition->condition = transitions2->transition->condition;
-                                tempTransition->add = transitions2->transition->add;
+                                tempTransition->add = addToProdAdd(transitions2->transition->add, "prod2");
                                 tempTransition->blocked = 2;
                                 addTransition(tempTransition);
                             }
@@ -566,7 +621,7 @@ struct AutomatoProdList *productInSmv(struct AutomatoList *automatos, struct Str
                             snprintf(tempCondition, 6000, "%s & %s", transitions1->transition->condition, transitions2->transition->condition);
                             tempTransition->condition = tempCondition;
                             tempAdd = (char *)malloc(6000 * sizeof(char));
-                            snprintf(tempAdd, 6000, "%s & %s", transitions1->transition->add, transitions2->transition->add);
+                            snprintf(tempAdd, 6000, "%s%s", addToProdAdd(transitions1->transition->add, "prod1"), addToProdAdd(transitions2->transition->add, "prod2"));
                             tempTransition->add = tempAdd;
                             addTransition(tempTransition);
                         }
@@ -592,7 +647,7 @@ struct AutomatoProdList *productInSmv(struct AutomatoList *automatos, struct Str
                             tempTransition->nPorts = transitions2->transition->nPorts;
                             tempTransition->ports = transitions2->transition->ports;
                             tempTransition->condition = transitions2->transition->condition;
-                            tempTransition->add = transitions2->transition->add;
+                            tempTransition->add = addToProdAdd(transitions2->transition->add, "prod2");
                             tempTransition->blocked = 2;
                             addTransition(tempTransition);
                         }
@@ -619,7 +674,7 @@ struct AutomatoProdList *productInSmv(struct AutomatoList *automatos, struct Str
             states1 = states1->nextState;
         }
         tempAdd = (char *)malloc(6000 * sizeof(char));
-        snprintf(tempAdd, 6000, "%s & %s", automato1->add, automato2->add);
+        snprintf(tempAdd, 6000, "%s & %s", addToProdAdd(automato1->add, "prod1"), addToProdAdd(automato2->add, "prod2"));
         if (automatos->nextAutomato->nextAutomato == NULL)
             strcpy(concat, "finalAutomata\0");
         else
@@ -705,7 +760,7 @@ void prodToNuxmv(struct AutomatoProd *prod, struct StringList *ports, FILE *f, i
             {
                 fprintf(f, "%s(cs = %s & ", second ? "\n\t| " : "(", transitions->transition->start->name);
                 nullPorts(ports, transitions->transition, f);
-                fprintf(f, " %s%s)", transitions->transition->condition, transitions->transition->blocked == 1 ? " & FALSE" : "");
+                fprintf(f, " %s%s%s)", transitions->transition->condition, transitions->transition->add, transitions->transition->blocked == 1 ? " & FALSE" : "");
                 second++;
             }
             transitions = transitions->nextTransition;
