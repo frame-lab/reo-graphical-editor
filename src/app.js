@@ -180,8 +180,8 @@ function buttonClick(button) {
 document.getElementById("select").onclick = () =>
   buttonClick(document.getElementById("select"));
 // document.getElementById("split").onclick = () => buttonClick(document.getElementById("split"));
-document.getElementById("component").onclick = () =>
-  buttonClick(document.getElementById("component"));
+// document.getElementById("component").onclick = () =>
+//   buttonClick(document.getElementById("component"));
 
 downloadResponse = function (response, filename) {
   var blob = new Blob([response], { type: "octet/stream" });
@@ -628,7 +628,11 @@ function completeChannelCreation(channel, node1, node2, manual) {
   channel.toReo = function (withComment) {
     let code = codeEditor.getValue();
     let argumentHeader = `${this.name}(${this.node1.label.text}, ${this.node2.label.text})`;
-    if (this.name === "timer" || this.name === "timedtransformer") {
+    if (
+      this.name === "timer" ||
+      this.name === "timedtransformer" ||
+      this.name === "timeddelay"
+    ) {
       let argumentStart = code.indexOf(argumentHeader);
       let argument =
         argumentStart > -1
@@ -1581,9 +1585,8 @@ function mergeNodes(destination, source) {
           });
         }
         const bossTransform = curve.calcTransformMatrix();
-        const invertedBossTransform = fabric.util.invertTransform(
-          bossTransform
-        );
+        const invertedBossTransform =
+          fabric.util.invertTransform(bossTransform);
         channel.parts[i].relationship = fabric.util.multiplyTransformMatrices(
           invertedBossTransform,
           channel.parts[i].calcTransformMatrix(),

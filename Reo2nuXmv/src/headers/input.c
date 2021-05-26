@@ -634,6 +634,73 @@ struct Automato *createTimedTransformer(char *ports, int nAuto, int lineCount, c
     return automato;
 }
 
+struct Automato *createTimedDelay(char *ports, int nAuto, int lineCount, char *param)
+{
+    char port1[20];
+    char port2[20];
+    memset(port1, 0, sizeof(port1));
+    memset(port2, 0, sizeof(port2));
+    int i = 0, j = 0;
+    while (ports[i] != ',')
+    {
+        port1[i] = ports[i];
+        i++;
+    }
+    i++;
+    while (ports[i] != ')' && ports[i] != '\0')
+    {
+        if (ports[i] != ' ')
+        {
+            port2[j] = ports[i];
+            j++;
+        }
+        i++;
+    }
+    char varInicial[] = "5";
+    char varFinal[] = "10";
+    struct State *state1 = newState("q0", 1);
+    struct State *state2 = newState("p0", 0);
+    char *condition = (char *)malloc(600 * sizeof(char));
+    char *add = (char *)malloc(600 * sizeof(char));
+    struct StringList *portsList = NULL;
+    portsList = addString(portsList, port1);
+    snprintf(condition, 600, "ports.%s[time] != NULL", port1);
+    snprintf(add, 600, " & next( data ) = ports.%s[time] & next( var ) = 0", port1);
+    struct Transition *transition = (struct Transition *)malloc(sizeof(struct Transition));
+    transition->start = state1;
+    transition->end = state2;
+    transition->nPorts = 1;
+    transition->ports = portsList;
+    transition->condition = condition;
+    transition->blocked = 0;
+    transition->add = add;
+    addTransition(transition);
+    condition = (char *)malloc(600 * sizeof(char));
+    add = (char *)malloc(600 * sizeof(char));
+    portsList = NULL;
+    portsList = addString(portsList, port2);
+    snprintf(condition, 600, "ports.%s[time] = data & var > %s & var < %s", port2, varInicial, varFinal);
+    snprintf(add, 600, " & next( data ) = NULL & next( var ) = 0");
+    transition = (struct Transition *)malloc(sizeof(struct Transition));
+    transition->start = state2;
+    transition->end = state1;
+    transition->nPorts = 1;
+    transition->ports = portsList;
+    transition->condition = condition;
+    transition->blocked = 0;
+    transition->add = add;
+    addTransition(transition);
+    char *automatoName = (char *)malloc(600 * sizeof(char));
+    snprintf(automatoName, 600, "timeddelay%d", nAuto);
+    struct Automato *automato = newAutomato(automatoName, lineCount);
+    addState(state1, automato);
+    addState(state2, automato);
+    add = (char *)malloc(1024 * sizeof(char));
+    snprintf(add, 1024, "var < %s <-> next( var ) = (var + 1)", varFinal);
+    automato->add = add;
+    return automato;
+}
+
 struct AutomatoList *
 readInput(FILE *f)
 {
@@ -756,6 +823,19 @@ readInput(FILE *f)
             temp = createTimedTransformer(ports, nAuto, lineCount, param);
             automatoList = addAutomato(automatoList, temp);
         }
+        if (strcmp(command, "timeddelay") == 0)
+        {
+            while ((line[i] != ';') && (line[i] != '\n') && (line[i] != '\0') && line[i] != '/')
+            {
+                param[j] = line[i];
+                i++;
+                j++;
+            }
+            nAuto++;
+            temp = createTimedDelay(ports, nAuto, lineCount, param);
+            automatoList = addAutomato(automatoList, temp);
+        }
+        
         memset(line, '\0', sizeof(line));
         lineCount++;
     }
