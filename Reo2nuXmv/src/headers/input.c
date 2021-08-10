@@ -524,7 +524,27 @@ struct Automato *createTimer(char *ports, int nAuto, int lineCount, char *param)
         }
         i++;
     }
-    char varInicial[] = "5";
+    i = 0;
+    j = 0;
+    char varInicial[20];
+    char varFinal[20];
+    memset(varInicial, 0, sizeof(varInicial));
+    memset(varFinal, 0, sizeof(varFinal));
+    while (param[i] != ',')
+    {
+        varInicial[i] = param[i];
+        i++;
+    }
+    i++;
+    while (param[i] != ';' && param[i] != '\0')
+    {
+        if (param[i] != ' ')
+        {
+            varFinal[j] = param[i];
+            j++;
+        }
+        i++;
+    }
     struct State *state1 = newState("q0", 1);
     struct State *state2 = newState("p0", 0);
     char *condition = (char *)malloc(600 * sizeof(char));
@@ -563,7 +583,7 @@ struct Automato *createTimer(char *ports, int nAuto, int lineCount, char *param)
     addState(state1, automato);
     addState(state2, automato);
     add = (char *)malloc(1024 * sizeof(char));
-    snprintf(add, 1024, "var > 0 <-> next( var ) = (%s)", param);
+    snprintf(add, 1024, "var > 0 <-> next( var ) = (%s)", varFinal);
     automato->add = add;
     return automato;
 }
@@ -590,7 +610,28 @@ struct Automato *createTimedTransformer(char *ports, int nAuto, int lineCount, c
         }
         i++;
     }
-    char varInicial[] = "5";
+    i = 0;
+    j = 0;
+    char varInicial[20];
+    char varFinal[20];
+    memset(varInicial, 0, sizeof(varInicial));
+    memset(varFinal, 0, sizeof(varFinal));
+    while (param[i] != ',')
+    {
+        varInicial[i] = param[i];
+        i++;
+    }
+    i++;
+    while (param[i] != ';' && param[i] != '\0')
+    {
+        if (param[i] != ' ')
+        {
+            varFinal[j] = param[i];
+            j++;
+        }
+        i++;
+    }
+
     struct State *state1 = newState("q0", 1);
     struct State *state2 = newState("p0", 0);
     char *condition = (char *)malloc(600 * sizeof(char));
@@ -629,7 +670,7 @@ struct Automato *createTimedTransformer(char *ports, int nAuto, int lineCount, c
     addState(state1, automato);
     addState(state2, automato);
     add = (char *)malloc(1024 * sizeof(char));
-    snprintf(add, 1024, "var > %s <-> next( var ) = (%s)", varInicial, param);
+    snprintf(add, 1024, "var > %s <-> next( var ) = (%s)", varInicial, varFinal);
     automato->add = add;
     return automato;
 }
@@ -656,8 +697,27 @@ struct Automato *createTimedDelay(char *ports, int nAuto, int lineCount, char *p
         }
         i++;
     }
-    char varInicial[] = "5";
-    char varFinal[] = "10";
+    i = 0;
+    j = 0;
+    char varInicial[20];
+    char varFinal[20];
+    memset(varInicial, 0, sizeof(varInicial));
+    memset(varFinal, 0, sizeof(varFinal));
+    while (param[i] != ',')
+    {
+        varInicial[i] = param[i];
+        i++;
+    }
+    i++;
+    while (param[i] != ';' && param[i] != '\0')
+    {
+        if (param[i] != ' ')
+        {
+            varFinal[j] = param[i];
+            j++;
+        }
+        i++;
+    }
     struct State *state1 = newState("q0", 1);
     struct State *state2 = newState("p0", 0);
     char *condition = (char *)malloc(600 * sizeof(char));
@@ -835,7 +895,7 @@ readInput(FILE *f)
             temp = createTimedDelay(ports, nAuto, lineCount, param);
             automatoList = addAutomato(automatoList, temp);
         }
-        
+
         memset(line, '\0', sizeof(line));
         lineCount++;
     }

@@ -29,8 +29,8 @@ void caToNuxmv(struct Automato *automato, struct StringList *ports, FILE *f)
         fprintf(f, "--Channel from line %d on the input file\n", automato->lineCount);
     }
     fprintf(f, "MODULE %s(time)\nVAR\n\tports: ", automato->name);
-    fprintf(f, "portsModule;\n");
-    fprintf(f, "\tcs: {");
+    fprintf(f, "portsModule;\n\tvar: real;\n\tdata: {0,1};\n\t");
+    fprintf(f, "cs: {");
     struct TransitionList *allTransitions = NULL;
     while (states != NULL)
     {
@@ -109,16 +109,13 @@ void caToNuxmv(struct Automato *automato, struct StringList *ports, FILE *f)
                 closeTransition = 1;
             }
         }
-        if (closeTransition == 1)
+        if (automato->add != NULL & states->nextState == NULL)
         {
-            if (automato->add != NULL & states->nextState == NULL)
-            {
-                fprintf(f, "\n\t& (%s);\n\n", automato->add);
-            }
-            else
-            {
-                fprintf(f, "%s", states->nextState != NULL ? " &\n\t" : ";\n\n");
-            }
+            fprintf(f, "%s(%s);\n\n", closeTransition == 1 ? "\n\t& " : "", automato->add);
+        }
+        else if (closeTransition == 1)
+        {
+            fprintf(f, "%s", states->nextState != NULL ? " &\n\t" : ";\n\n");
         }
         states = states->nextState;
     }
@@ -254,7 +251,7 @@ void printToNuXmv(struct StringList *trans, struct StringList *states, struct St
 {
     int initState = states->nextString != NULL ? 1 : 0;
     fprintf(f, "MODULE %s(time)\nVAR\n", automatoName);
-    fprintf(f, "\tprod1: %s(time);\n\tprod2: %s(time);\n\tports: portsModule;\n",
+    fprintf(f, "\tprod1: %s(time);\n\tprod2: %s(time);\n\tports: portsModule;\n\tvar: real;\n\tdata: {0,1};\n",
             components->string, components->nextString->string);
     fprintf(f, "\tcs: {");
     while (states != NULL)
@@ -392,6 +389,7 @@ void printaAutomatoFinal(struct Automato *automato)
         exit(1);
     }
     int time = portsToNuXmv(f, automato->ports) - 1;
+    printAutomato(automato);
     fprintf(f, "MODULE main\nVAR\n\ttime: 0..%d;\n\tautomato: %s(time);\n", time, automato->name);
     fprintf(f, "ASSIGN\n\tinit(time) := 0;\n\tnext(time) := case\n\t\ttime < %d: time + 1;\n\t\tTRUE: time;\nesac;\n\n", time);
     fprintf(f, "--Final product, corresponding to the full circuit\n");
@@ -445,13 +443,13 @@ char **tokenize(const char *str)
 
 char *addToProdAdd(char *add, char *prod)
 {
-    char *prodAdd = (char *)malloc(600 * sizeof(char));
+    char *prodAdd = (char *)malloc(2000 * sizeof(char));
     stpncpy(prodAdd, "\0", 1);
     char **tokens = tokenize(add);
     char **it;
     for (it = tokens; it && *it; ++it)
     {
-        if (strcmp(*it, "var") == 0 || strcmp(*it, "data") == 0)
+        if (strcmp(*it, "var") == 0 || strcmp(*it, "data") == 0 || strstr(*it, ".var") != NULL || strstr(*it, ".data") != NULL)
         {
             strcat(prodAdd, prod);
             strcat(prodAdd, ".");
