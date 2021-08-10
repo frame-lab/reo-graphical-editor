@@ -389,7 +389,6 @@ void printaAutomatoFinal(struct Automato *automato)
         exit(1);
     }
     int time = portsToNuXmv(f, automato->ports) - 1;
-    printAutomato(automato);
     fprintf(f, "MODULE main\nVAR\n\ttime: 0..%d;\n\tautomato: %s(time);\n", time, automato->name);
     fprintf(f, "ASSIGN\n\tinit(time) := 0;\n\tnext(time) := case\n\t\ttime < %d: time + 1;\n\t\tTRUE: time;\nesac;\n\n", time);
     fprintf(f, "--Final product, corresponding to the full circuit\n");
