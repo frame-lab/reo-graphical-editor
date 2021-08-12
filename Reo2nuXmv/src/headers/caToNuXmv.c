@@ -17,6 +17,41 @@ void nullPorts(struct StringList *ports, struct Transition *transition, FILE *f)
     }
 }
 
+void str_replace(char *target, const char *needle, const char *replacement)
+{
+    char buffer[2048] = {0};
+    char *insert_point = &buffer[0];
+    const char *tmp = target;
+    size_t needle_len = strlen(needle);
+    size_t repl_len = strlen(replacement);
+
+    while (1)
+    {
+        const char *p = strstr(tmp, needle);
+
+        // walked past last occurrence of needle; copy remaining part
+        if (p == NULL)
+        {
+            strcpy(insert_point, tmp);
+            break;
+        }
+
+        // copy part before needle
+        memcpy(insert_point, tmp, p - tmp);
+        insert_point += p - tmp;
+
+        // copy replacement string
+        memcpy(insert_point, replacement, repl_len);
+        insert_point += repl_len;
+
+        // adjust pointers, move on
+        tmp = p + needle_len;
+    }
+
+    // write altered string back to target
+    strcpy(target, buffer);
+}
+
 void caToNuxmv(struct Automato *automato, struct StringList *ports, FILE *f)
 {
     int nStates = automato->nStates;
@@ -84,6 +119,13 @@ void caToNuxmv(struct Automato *automato, struct StringList *ports, FILE *f)
             {
                 fprintf(f, "%s(cs = %s & ", second ? "\n\t| " : "(", transitions->transition->start->name);
                 nullPorts(ports, transitions->transition, f);
+                str_replace(transitions->transition->condition, "prod1.", "prod1");
+                str_replace(transitions->transition->condition, "prod2.", "prod2");
+                if (transitions->transition->add != NULL)
+                {
+                    str_replace(transitions->transition->add, "prod1.", "prod1");
+                    str_replace(transitions->transition->add, "prod2.", "prod2");
+                }
                 fprintf(f, " %s%s%s)", transitions->transition->condition, transitions->transition->add, transitions->transition->blocked == 1 ? " & FALSE" : "");
                 second++;
                 closeTransition = 1;
@@ -111,7 +153,9 @@ void caToNuxmv(struct Automato *automato, struct StringList *ports, FILE *f)
         }
         if (automato->add != NULL & states->nextState == NULL)
         {
-            fprintf(f, "%s(%s);\n\n", closeTransition == 1 ? "\n\t& " : "", automato->add);
+            str_replace(automato->add, "prod1.", "prod1");
+            str_replace(automato->add, "prod2.", "prod2");
+            fprintf(f, "%s( %s);\n\n", closeTransition == 1 ? "\n\t& " : "", automato->add);
         }
         else if (closeTransition == 1)
         {
@@ -671,7 +715,21 @@ struct AutomatoProdList *productInSmv(struct AutomatoList *automatos, struct Str
             states1 = states1->nextState;
         }
         tempAdd = (char *)malloc(6000 * sizeof(char));
-        snprintf(tempAdd, 6000, "%s & %s", addToProdAdd(automato1->add, "prod1"), addToProdAdd(automato2->add, "prod2"));
+        if (automato1->add != NULL && strlen(automato1->add) > 0)
+        {
+            if (automato2->add != NULL && strlen(automato2->add) > 0)
+            {
+                snprintf(tempAdd, 6000, "%s & %s", addToProdAdd(automato1->add, "prod1"), addToProdAdd(automato2->add, "prod2"));
+            }
+            else
+            {
+                snprintf(tempAdd, 6000, "%s", addToProdAdd(automato1->add, "prod1"));
+            }
+        }
+        else if (automato2->add != NULL && strlen(automato2->add) > 0)
+        {
+            snprintf(tempAdd, 6000, "%s", addToProdAdd(automato2->add, "prod2"));
+        }
         if (automatos->nextAutomato->nextAutomato == NULL)
             strcpy(concat, "finalAutomata\0");
         else

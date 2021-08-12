@@ -538,11 +538,8 @@ struct Automato *createTimer(char *ports, int nAuto, int lineCount, char *param)
     i++;
     while (param[i] != ';' && param[i] != '\0')
     {
-        if (param[i] != ' ')
-        {
-            varFinal[j] = param[i];
-            j++;
-        }
+        varFinal[j] = param[i];
+        j++;
         i++;
     }
     struct State *state1 = newState("q0", 1);
@@ -603,11 +600,8 @@ struct Automato *createTimedTransformer(char *ports, int nAuto, int lineCount, c
     i++;
     while (ports[i] != ')' && ports[i] != '\0')
     {
-        if (ports[i] != ' ')
-        {
-            port2[j] = ports[i];
-            j++;
-        }
+        port2[j] = ports[i];
+        j++;
         i++;
     }
     i = 0;
@@ -711,11 +705,8 @@ struct Automato *createTimedDelay(char *ports, int nAuto, int lineCount, char *p
     i++;
     while (param[i] != ';' && param[i] != '\0')
     {
-        if (param[i] != ' ')
-        {
-            varFinal[j] = param[i];
-            j++;
-        }
+        varFinal[j] = param[i];
+        j++;
         i++;
     }
     struct State *state1 = newState("q0", 1);
@@ -756,7 +747,7 @@ struct Automato *createTimedDelay(char *ports, int nAuto, int lineCount, char *p
     addState(state1, automato);
     addState(state2, automato);
     add = (char *)malloc(1024 * sizeof(char));
-    snprintf(add, 1024, "var < %s <-> next( var ) = (var + 1)", varFinal);
+    snprintf(add, 1024, "var < %s <-> next( var ) = ( var + 1 )", varFinal);
     automato->add = add;
     return automato;
 }
