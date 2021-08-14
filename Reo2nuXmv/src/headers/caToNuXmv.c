@@ -126,7 +126,7 @@ void caToNuxmv(struct Automato *automato, struct StringList *ports, FILE *f)
                     str_replace(transitions->transition->add, "prod1.", "prod1");
                     str_replace(transitions->transition->add, "prod2.", "prod2");
                 }
-                fprintf(f, " %s%s%s)", transitions->transition->condition, transitions->transition->add, transitions->transition->blocked == 1 ? " & FALSE" : "");
+                fprintf(f, " %s%s%s)", transitions->transition->condition, transitions->transition->add != NULL ? transitions->transition->add : "", transitions->transition->blocked == 1 ? " & FALSE" : "");
                 second++;
                 closeTransition = 1;
             }
@@ -153,6 +153,11 @@ void caToNuxmv(struct Automato *automato, struct StringList *ports, FILE *f)
         }
         if (automato->add != NULL & states->nextState == NULL)
         {
+            if (printTrans)
+            {
+                fprintf(f, "TRANS\n\t");
+                printTrans = 0;
+            }
             str_replace(automato->add, "prod1.", "prod1");
             str_replace(automato->add, "prod2.", "prod2");
             fprintf(f, "%s( %s);\n\n", closeTransition == 1 ? "\n\t& " : "", automato->add);
@@ -601,7 +606,7 @@ struct AutomatoProdList *productInSmv(struct AutomatoList *automatos, struct Str
                         tempTransition->end = tempState;
                         tempTransition->nPorts = transitions1->transition->nPorts;
                         tempTransition->ports = transitions1->transition->ports;
-                        tempTransition->condition = transitions1->transition->condition;
+                        tempTransition->condition = addToProdAdd(transitions1->transition->condition, "prod1");
                         tempTransition->add = addToProdAdd(transitions1->transition->add, "prod1");
                         tempTransition->blocked = 2;
                         addTransition(tempTransition);
@@ -625,7 +630,7 @@ struct AutomatoProdList *productInSmv(struct AutomatoList *automatos, struct Str
                                 tempTransition->end = tempState;
                                 tempTransition->nPorts = transitions2->transition->nPorts;
                                 tempTransition->ports = transitions2->transition->ports;
-                                tempTransition->condition = transitions2->transition->condition;
+                                tempTransition->condition = addToProdAdd(transitions2->transition->condition, "prod2");
                                 tempTransition->add = addToProdAdd(transitions2->transition->add, "prod2");
                                 tempTransition->blocked = 2;
                                 addTransition(tempTransition);
@@ -659,7 +664,7 @@ struct AutomatoProdList *productInSmv(struct AutomatoList *automatos, struct Str
                             tempTransition->nPorts = tempNPorts;
                             tempTransition->ports = tempPorts;
                             tempCondition = (char *)malloc(6000 * sizeof(char));
-                            snprintf(tempCondition, 6000, "%s & %s", transitions1->transition->condition, transitions2->transition->condition);
+                            snprintf(tempCondition, 6000, "%s & %s", addToProdAdd(transitions1->transition->condition, "prod1"), addToProdAdd(transitions2->transition->condition, "prod2"));
                             tempTransition->condition = tempCondition;
                             tempAdd = (char *)malloc(6000 * sizeof(char));
                             snprintf(tempAdd, 6000, "%s%s", addToProdAdd(transitions1->transition->add, "prod1"), addToProdAdd(transitions2->transition->add, "prod2"));
@@ -687,7 +692,7 @@ struct AutomatoProdList *productInSmv(struct AutomatoList *automatos, struct Str
                             tempTransition->end = tempState;
                             tempTransition->nPorts = transitions2->transition->nPorts;
                             tempTransition->ports = transitions2->transition->ports;
-                            tempTransition->condition = transitions2->transition->condition;
+                            tempTransition->condition = addToProdAdd(transitions2->transition->condition, "prod2");
                             tempTransition->add = addToProdAdd(transitions2->transition->add, "prod2");
                             tempTransition->blocked = 2;
                             addTransition(tempTransition);
