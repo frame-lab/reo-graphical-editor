@@ -14,7 +14,7 @@ Proof.
 intros.
 assert (forall z, z # 1 < (z + 1) # 1).
 + intros. assert (inject_Z z < inject_Z (z + 1)). rewrite <- Zlt_Qlt. 
-  omega. unfold inject_Z in H. exact H.
+  lia. unfold inject_Z in H. exact H.
 + assert (forall b, forall a, (b + a) # 1 < ((b + 1) + a) # 1).
   intros. rewrite <- Z.add_assoc. rewrite (Z.add_comm 1).
   rewrite Z.add_assoc. apply H.
@@ -23,7 +23,7 @@ assert (forall z, z # 1 < (z + 1) # 1).
 
 Close Scope Q_scope.
 
-Obligation Tactic := unfold complement, equiv ; program_simpl.
+Obligation Tactic := program_simpl; congruence.
 
 
 Set Implicit Arguments.
@@ -33,7 +33,7 @@ Set Maximal Implicit Insertion.
 Import ListNotations.
 (* ---------------------------------------- Utils ---------------------------------------------------------------- *)
 
-Instance option_eqdec A `(EqDec A eq) : EqDec (option A) eq :=
+Program Instance option_eqdec A `(EqDec A eq) : EqDec (option A) eq :=
 {
   equiv_dec x y :=
     match x, y with
@@ -42,11 +42,8 @@ Instance option_eqdec A `(EqDec A eq) : EqDec (option A) eq :=
       | Some _, None | None, Some _ => in_right
     end
  }.
-Proof.
-all:congruence.
-Defined.
 
-Instance pair_eqdec A B `(EqDec A eq) `(EqDec B eq) : EqDec (A * B) eq :=
+Program Instance pair_eqdec A B `(EqDec A eq) `(EqDec B eq) : EqDec (A * B) eq :=
 {
   equiv_dec x y:=
     match x, y with
@@ -55,9 +52,6 @@ Instance pair_eqdec A B `(EqDec A eq) `(EqDec B eq) : EqDec (A * B) eq :=
                          else in_right
     end
 }.
-Proof.
-all: congruence.
-Defined.
 
 Program Fixpoint s1_in_s2 {A} `{EqDec A eq} (s1 s2 : set A) :=
   match s1 with
@@ -700,7 +694,7 @@ Module ConstraintAutomata.
   (* Equivalence for DCs. Requires that an equality relation to be defined for functions data -> data *)
   Context `{EqDec (data -> data) eq}.
   
-  Instance dc_eqDec `(EqDec name eq) `(EqDec data eq)  : EqDec (DC name data) eq :=
+Program Instance dc_eqDec `(EqDec name eq) `(EqDec data eq)  : EqDec (DC name data) eq :=
     { equiv_dec := fix rec dc1 dc2 :=
       match dc1,dc2 with
        | tDc _ _, tDc _ _ => in_left
@@ -710,12 +704,55 @@ Module ConstraintAutomata.
        | orDc a b, orDc c d => if rec a c then if rec b d then in_left else in_right else in_right
        | negDc a, negDc b => if rec a b then in_left else in_right
        | trDc f a b, trDc g c d => if f == g then if a == c then if b == d then in_left else in_right else in_right else in_right
-       | _, _ => in_right
+       | tDc _ _ , dc a b => in_right
+       | tDc _ _ , eqDc _ a b => in_right
+       | tDc _ _ , andDc a b | tDc _ _ , orDc a b => in_right
+       | tDc _ _ , negDc a => in_right
+       | tDc _ _ , trDc f a b => in_right
+
+       | dc a b  , tDc _ _ => in_right
+       | dc a b  , eqDc _ c d => in_right
+       | dc a b  , andDc c d => in_right
+       | dc a b  , orDc c d => in_right
+       | dc a b  , negDc c => in_right
+       | dc a b  , trDc f c d => in_right
+
+       | eqDc _ a b  , tDc _ _ => in_right
+       | eqDc _ a b  , dc c d => in_right
+       | eqDc _ a b  , andDc c d => in_right
+       | eqDc _ a b  , orDc c d => in_right
+       | eqDc _ a b  , negDc c => in_right
+       | eqDc _ a b  , trDc f c d => in_right
+
+       | andDc a b  , tDc _ _ => in_right
+       | andDc a b  , dc c d => in_right
+       | andDc a b  , eqDc _ c d => in_right
+       | andDc a b  , orDc c d => in_right
+       | andDc a b  , negDc c => in_right
+       | andDc a b  , trDc f c d => in_right
+
+       | orDc a b  , tDc _ _ => in_right
+       | orDc a b  , dc c d => in_right
+       | orDc a b  , eqDc _ c d => in_right
+       | orDc a b  , andDc c d => in_right
+       | orDc a b  , negDc c => in_right
+       | orDc a b  , trDc f c d => in_right
+
+       | negDc a  , tDc _ _ => in_right
+       | negDc a  , dc c d => in_right
+       | negDc a  , eqDc _ c d => in_right
+       | negDc a  , andDc c d => in_right
+       | negDc a  , orDc b c => in_right
+       | negDc a  , trDc f c d => in_right
+
+       | trDc f a b , tDc _ _ => in_right
+       | trDc f a b , dc c d => in_right
+       | trDc f a b , eqDc _ c d => in_right
+       | trDc f a b , andDc c d => in_right
+       | trDc f a b , orDc c d => in_right
+       | trDc f a b , negDc c => in_right
       end
     }.
-    Proof. 
-    all : congruence.
-    Defined.
 
   (* After reconstructing a DC as Notation 3.8 from a set of possible data constraints of transitions q -> P *)
   (* We need to evaluate whether they are equivalent or not                                                  *)

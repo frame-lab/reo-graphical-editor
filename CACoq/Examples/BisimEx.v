@@ -1,12 +1,15 @@
 Require Import CaMain.
 Require Import ReoCA.
+Import ListNotations.
+
+Obligation Tactic := program_simpl ; congruence.
 
 (*Two bisimilar automata from Baier et al.'s 2006 paper introducing Constraint Automata *)
 
 Inductive automatonStates := q1 | p1 | r1 | q2 | p2 | r2 | p2' | q3 | u3.
 Inductive automatonPorts := A | B | C.
 
-Instance automatonStatesEq : EqDec automatonStates eq := 
+Program Instance automatonStatesEq : EqDec automatonStates eq := 
 	{equiv_dec x y := 
 		match x, y with 
 		| q1,q1 => in_left 
@@ -27,14 +30,10 @@ Instance automatonStatesEq : EqDec automatonStates eq :=
     | p2',q1 | p2', p1 | p2',q2 | p2',p2 | p2', r1 | p2',r2 | p2',q3 | p2',u3 => in_right
     | q3,q1 | q3,p1 | q3, r1 | q3,q2 | q3,p2 | q3, r2 | q3,p2' | q3,u3 => in_right
     | u3,q1 | u3,p1 | u3, r1 | u3,q2 | u3,p2 | u3, r2 | u3,p2' | u3,q3 => in_right
-
 		end 
 	}.
-   Proof.
-   all: congruence.
-   Defined.
 
-Instance automatonPortsEq : EqDec automatonPorts eq := 
+Program Instance automatonPortsEq : EqDec automatonPorts eq := 
 	{equiv_dec x y := 
 		match x, y with 
 		| A,A => in_left 
@@ -48,9 +47,8 @@ Instance automatonPortsEq : EqDec automatonPorts eq :=
     | C,B => in_right
 		end 
 	}.
-  Proof.
-  all:congruence.
-  Defined.
+
+Close Scope Q_scope.
 
   Definition dataAssignmentA n := 
     match n with

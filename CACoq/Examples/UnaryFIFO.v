@@ -1,11 +1,14 @@
 Require Import CaMain.
 Require Import ReoCA.
+Import ListNotations.
+
+Obligation Tactic := program_simpl; congruence.
 
 (* An unary FIFO as a simple example *)
 Inductive automatonStates := q0 | q1.
 Inductive automatonPorts := A | B.
 
-Instance automatonStatesEq : EqDec automatonStates eq := 
+Program Instance automatonStatesEq : EqDec automatonStates eq := 
 	{equiv_dec x y := 
 		match x, y with 
 		| q0,q0 => in_left 
@@ -13,11 +16,8 @@ Instance automatonStatesEq : EqDec automatonStates eq :=
     | q0,q1 | q1,q0 => in_right
 		end 
 	}.
-   Proof.
-   all: congruence.
-   Defined.
 
-Instance automatonPortsEq : EqDec automatonPorts eq := 
+Program Instance automatonPortsEq : EqDec automatonPorts eq := 
 	{equiv_dec x y := 
 		match x, y with 
 		| A,A => in_left 
@@ -26,9 +26,6 @@ Instance automatonPortsEq : EqDec automatonPorts eq :=
 		| B,A => in_right 
 		end 
 	}.
-  Proof.
-  all:congruence.
-  Defined.
 
   Definition dataAssignmentA n := 
     match n with
@@ -148,13 +145,13 @@ Instance automatonPortsEq : EqDec automatonPorts eq :=
     intros. case n3. auto.
     simpl. Admitted.
 
-  Theorem vai2 : ConstraintAutomata.accepting' unaryFIFO [portA;portB].
+(*   Theorem vai2 : ConstraintAutomata.accepting' unaryFIFO [portA;portB].
   Proof.
   unfold ConstraintAutomata.accepting'.
   intros. destruct q. induction k.
   - unfold ConstraintAutomata.stepAux. simpl. congruence.
   - unfold ConstraintAutomata.stepAux. simpl. rewrite aux'. simpl. discriminate.
-  - unfold ConstraintAutomata.stepAux. simpl. congruence.
+  - unfold ConstraintAutomata.stepAux. simpl. congruence. *)
   (* Structural Properties *) 
 
   (* For any transtition from a starting state, it must have data only in A and accept any data *)

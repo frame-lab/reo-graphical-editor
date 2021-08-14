@@ -1,22 +1,22 @@
 Require Import CaMain.
 Require Import ReoCA.
 Require Import Coq.micromega.Lia.
+Import ListNotations.
+
+Obligation Tactic := program_simpl; congruence.
 
 (* An unary FIFO as a simple example *)
 Inductive automatonStates := q0.
 Inductive automatonPorts := A | B.
 
-Instance automatonStatesEq : EqDec automatonStates eq := 
+Program Instance automatonStatesEq : EqDec automatonStates eq := 
 	{equiv_dec x y := 
 		match x, y with 
 		| q0,q0 => in_left
 		end 
 	}.
-   Proof.
-   all: congruence.
-   Defined.
 
-Instance automatonPortsEq : EqDec automatonPorts eq := 
+Program Instance automatonPortsEq : EqDec automatonPorts eq := 
 	{equiv_dec x y := 
 		match x, y with 
 		| A,A => in_left 
@@ -25,9 +25,6 @@ Instance automatonPortsEq : EqDec automatonPorts eq :=
 		| B,A => in_right 
 		end 
 	}.
-  Proof.
-  all:congruence.
-  Defined.
 
   Definition dataAssignmentA n := 
     match n with
@@ -134,7 +131,6 @@ Instance automatonPortsEq : EqDec automatonPorts eq :=
     intros. case n3. auto.
     intros.
     unfold ConstraintAutomata.minimum.
-    ring.
     simpl.  
     case_eq (Qle_bool (Z.pos
                (Pos.succ

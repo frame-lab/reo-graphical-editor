@@ -2,9 +2,13 @@
 (* It requires the compilation of CaMain.v file in https://github.com/frame-lab/CACoq. *) 
 Require Import CaMain. 
 Require Import ReoCA.
+Import ListNotations.
+
+Obligation Tactic := program_simpl; congruence.
+
 Inductive modelPortsType := 
 	a | b |  c. 
-Instance modelPortsEqDec : EqDec modelPortsType eq :=
+Program Instance modelPortsEqDec : EqDec modelPortsType eq :=
 	{equiv_dec x y := 
 		 match x, y with 
 		| a , a => in_left 
@@ -18,23 +22,18 @@ Instance modelPortsEqDec : EqDec modelPortsType eq :=
 		| c , c => in_left 
 	end
 	}.
-Proof.
-all: congruence.
-Defined.
 Inductive lossySync1StatesType := 
 	q0.
-Instance lossySync1EqDec : EqDec lossySync1StatesType eq :=
+Program Instance lossySync1EqDec : EqDec lossySync1StatesType eq :=
 	{equiv_dec x y := 
 		 match x, y with 
 		| q0 , q0 => in_left 
 	end
 	}.
-Proof.
-all: congruence.
-Defined.
+
 Inductive fifo2StatesType := 
 	 r0 | 	 p0 | 	p1.
-Instance fifo2EqDec : EqDec fifo2StatesType eq :=
+Program Instance fifo2EqDec : EqDec fifo2StatesType eq :=
 	{equiv_dec x y := 
 		 match x, y with 
 		| r0 , r0 => in_left 
@@ -48,9 +47,6 @@ Instance fifo2EqDec : EqDec fifo2StatesType eq :=
 		| p1 , p1 => in_left 
 	end
 	}.
-Proof.
-all: congruence.
-Defined.
 Definition lossySync1rel (s: lossySync1StatesType) :=
 	match s with
 		 | q0 => [([a;b], ConstraintAutomata.eqDc nat a b , q0);

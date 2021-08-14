@@ -1,4 +1,7 @@
 Require Import CaMain.
+Import ListNotations.
+
+Obligation Tactic := program_simpl; congruence.
 
 (* This example consists on using two FIFO channels of capacity one in order to build  *)
 (* a single Reo channel which is a FIFO channel with capacity two. This is done by for-*)
@@ -8,7 +11,7 @@ Require Import CaMain.
 Inductive fifoStates := q0a | p0a | p1a | q0b | p0b | p1b.
 Inductive fifoPorts := A | B | C | D.
 
-Instance fifoStatesEq : EqDec fifoStates eq := 
+Program Instance fifoStatesEq : EqDec fifoStates eq := 
 	{equiv_dec x y := 
 		match x, y with 
 		| q0a,q0a => in_left 
@@ -49,11 +52,8 @@ Instance fifoStatesEq : EqDec fifoStates eq :=
 		| p1b,p0b => in_right 
 		end 
 	}.
-   Proof.
-   all: congruence.
-   Defined.
 
-Instance fifoPortsEq : EqDec fifoPorts eq := 
+Program Instance fifoPortsEq : EqDec fifoPorts eq := 
 	{equiv_dec x y := 
 		match x, y with 
 		| A,A => in_left 
@@ -74,9 +74,8 @@ Instance fifoPortsEq : EqDec fifoPorts eq :=
 		| D,C => in_right 
 		end 
 	}.
-  Proof.
-  all:congruence.
-  Defined.
+
+Close Scope Q_scope.
 
   Definition dataAssignmentA n := 
     match n with

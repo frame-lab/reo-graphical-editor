@@ -1,9 +1,13 @@
 Require Import CaMain.
 Require Import ReoCA.
+Import ListNotations.
+
+Obligation Tactic := program_simpl; congruence.
+
 Inductive sequencerStates := s0 | q0a | p0a| p1a.
 Inductive sequencerPorts := A | B | C | D | E | F | G | H | I | J.
 
-Instance sequencerStatesEq : EqDec sequencerStates eq := 
+Program Instance sequencerStatesEq : EqDec sequencerStates eq := 
 	{equiv_dec x y := 
 		match x, y with 
 		| s0,s0 => in_left 
@@ -24,11 +28,8 @@ Instance sequencerStatesEq : EqDec sequencerStates eq :=
 		| p1a,p0a => in_right 
 		end 
 	}.
-   Proof.
-   all: congruence.
-   Defined.
 
-Instance sequencerPortsEq : EqDec sequencerPorts eq := 
+Program Instance sequencerPortsEq : EqDec sequencerPorts eq := 
 	{equiv_dec x y := 
 		match x, y with 
 		| A,A => in_left 
@@ -133,9 +134,6 @@ Instance sequencerPortsEq : EqDec sequencerPorts eq :=
 		| J,I => in_right 
 		end 
 	}.
-  Proof.
-  all:congruence.
-  Defined.
 
   Definition dataAssignmentA n := 
     match n with
