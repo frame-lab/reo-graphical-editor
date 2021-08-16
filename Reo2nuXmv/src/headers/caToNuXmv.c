@@ -63,8 +63,8 @@ void caToNuxmv(struct Automato *automato, struct StringList *ports, FILE *f)
     {
         fprintf(f, "--Channel from line %d on the input file\n", automato->lineCount);
     }
-    fprintf(f, "MODULE %s(time)\nVAR\n\tports: ", automato->name);
-    fprintf(f, "portsModule;\n\tvar: real;\n\tdata: {0,1};\n\t");
+    fprintf(f, "MODULE %s(time, ports)\nVAR", automato->name);
+    fprintf(f, "\n\tvar: real;\n\tdata: {NULL, 0,1};\n\t");
     fprintf(f, "cs: {");
     struct TransitionList *allTransitions = NULL;
     while (states != NULL)
@@ -300,7 +300,7 @@ void printToNuXmv(struct StringList *trans, struct StringList *states, struct St
 {
     int initState = states->nextString != NULL ? 1 : 0;
     fprintf(f, "MODULE %s(time)\nVAR\n", automatoName);
-    fprintf(f, "\tprod1: %s(time);\n\tprod2: %s(time);\n\tports: portsModule;\n\tvar: real;\n\tdata: {0,1};\n",
+    fprintf(f, "\tprod1: %s(time);\n\tprod2: %s(time);\n\tports: portsModule;\n\tvar: real;\n\tdata: {NULL, 0,1};\n",
             components->string, components->nextString->string);
     fprintf(f, "\tcs: {");
     while (states != NULL)
@@ -438,7 +438,7 @@ void printaAutomatoFinal(struct Automato *automato)
         exit(1);
     }
     int time = portsToNuXmv(f, automato->ports) - 1;
-    fprintf(f, "MODULE main\nVAR\n\ttime: 0..%d;\n\tautomato: %s(time);\n", time, automato->name);
+    fprintf(f, "MODULE main\nVAR\n\ttime: 0..%d;\n\tports: portsModule();\n\tautomato: %s(time, ports);\n", time, automato->name);
     fprintf(f, "ASSIGN\n\tinit(time) := 0;\n\tnext(time) := case\n\t\ttime < %d: time + 1;\n\t\tTRUE: time;\nesac;\n\n", time);
     fprintf(f, "--Final product, corresponding to the full circuit\n");
     caToNuxmv(automato, automato->ports, f);
@@ -776,8 +776,7 @@ void prodToNuxmv(struct AutomatoProd *prod, struct StringList *ports, FILE *f, i
     {
         fprintf(f, "--Final product, corresponding to the full circuit\n");
     }
-    fprintf(f, "MODULE %s(time)\nVAR\n\tprod1: %s(time);\n\tprod2: %s(time);\n\tports: ", automato->name, prod->prod1, prod->prod2);
-    fprintf(f, "portsModule;\n");
+    fprintf(f, "MODULE %s(time, ports)\nVAR\n\tprod1: %s(time, ports);\n\tprod2: %s(time, ports);\n", automato->name, prod->prod1, prod->prod2);
     fprintf(f, "\tcs: {");
     while (states != NULL)
     {
@@ -868,7 +867,7 @@ void startNuxmv(struct AutomatoList *automatos)
     prods = productInSmv(automatos, ports, f);
     prodsTemp = prods;
     automatoList = automatos;
-    fprintf(f, "MODULE main\nVAR\n\ttime: 0..%d;\n\t%s: %s(time);\n", time, "finalAutomata", "finalAutomata");
+    fprintf(f, "MODULE main\nVAR\n\ttime: 0..%d;\n\tports: portsModule();\n\t%s: %s(time, ports);\n", time, "finalAutomata", "finalAutomata");
     fprintf(f, "ASSIGN\n\tinit(time) := 0;\n\tnext(time) := case\n\t\ttime < %d: time + 1;\n\t\tTRUE: time;\nesac;\n\n", time);
     while (automatoList != NULL)
     {
