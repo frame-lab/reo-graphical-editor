@@ -1,0 +1,17 @@
+main() {
+	//Channels
+	sync(a, b)
+	sync(c, d)
+	lossysync(e, f)
+	sync(g, h)
+	timer(b, j)[15, var - 1;]
+	timeddelay(f, t)[5, 10;]
+	timeddelay(d, t)[8, 14;]
+	sync(b, t)
+	timeddelay(h, z)[4, 12;]
+	timeddelay(d, z)[5, 10;]
+	sync(b, z)
+	timeddelay(h, i)[5, 14;]
+	timeddelay(f, i)[2, 8;]
+	sync(b, i)
+}
