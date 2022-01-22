@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 var archiver = require('archiver');
 
-var mimeTypes = {
+const mimeTypes = {
     "html": "text/html",
     "jpeg": "image/jpeg",
     "jpg": "image/jpeg",
@@ -14,6 +14,11 @@ var mimeTypes = {
     "css": "text/css",
     "treo": "text/treo"
 };
+
+const port = parseInt(process.env.PORT || "8081");
+const hostname = process.env.HOSTNAME || "127.0.0.1";
+
+console.log(`Server running at http://${hostname}:${port}/`);
 
 http.createServer((request, response) => {
     var pathname = url.parse(request.url).pathname;
@@ -137,9 +142,7 @@ http.createServer((request, response) => {
         }
     }
     return;
-}}}).listen(8081, '127.0.0.1');
-
-console.log('Server running at http://127.0.0.1:8081/');
+}}}).listen(port, hostname);
 
 function processPost(request, response, callback) {
     var queryData = "";
@@ -168,6 +171,5 @@ function processPost(request, response, callback) {
 
 function zipper() {
 
-
-
 }
+
