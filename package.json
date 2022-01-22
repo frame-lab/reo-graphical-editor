@@ -1,5 +1,5 @@
 {
-	"name": "reo-graphical-editor",
+	"name": "reoxplore",
 	"version": "0.1.0",
 	"scripts": {
 		"build:prod": "cross-env NODE_ENV=production webpack",
