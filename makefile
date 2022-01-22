@@ -11,7 +11,7 @@ all:
 docker_build:
 	docker build --build-arg CACHE=$(cache) -t $(IMAGE) .
 
-docker_run:
+docker_run: docker_build
 	docker run --rm -d --name $(project) --env-file docker.env -p 8081:8081 $(IMAGE)
 
 docker_stop:
