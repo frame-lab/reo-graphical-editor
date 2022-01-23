@@ -1,10 +1,10 @@
 # ReoXplore
 Web-based graphical editor for Reo language integrating [reo2nuXmv](https://github.com/frame-lab/Reo2nuXmv) and [CACoq](https://github.com/frame-lab/CACoq) tools.
 
-## Build
+## Build in host machine
 
 ### Prerequisites
-* NodeJS
+* NodeJS 10.12
 * Coq (to generate Haskell code)
 
 Note: The editor is not compatible with Internet Explorer.
@@ -15,7 +15,7 @@ Open a terminal in project's root directory and run command:
 $ npm i
 ```
 
-### Building
+### Building whit host
 In the project's root directory there is a makefile, you can run it with:
 ```console
 $ make
@@ -26,6 +26,21 @@ After building the project, run command:
 ```console
 $ npm start
 ```
+
+## Build with docker
+
+You can also build and run the project using docker.
+To build it you can use:
+```sh
+make docker_build
+```
+
+In order to execute it, you can run:
+```sh
+make docker_run
+```
+
+You may also use `make docker_stop` to close the server and `make docker_logs` to watch the logs from the server.
 
 ## Help
 This sections provides an explanation to the important names in the models.
