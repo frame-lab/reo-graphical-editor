@@ -657,7 +657,10 @@ void input2CoqCA(FILE *f) {
 	fprintf(output,"(* for each automaton formalized. The last definition in the .v file is the resulting product automaton from the whole model and it is*) \n");
 	fprintf(output,"(* the one that should be used to reason over the whole model constructed in ReoXplore GUI.*) \n \n");
 
-    fprintf(output,"Require Import CaMain. \n");
+    	fprintf(output,"Require Import CaMain. \n");
+	fprintf(output,"Import ListNotations. \n");
+	fprintf(output,"Close Scope Q_scope. (*We close Q scope as the data domain in this example is nat*) \n");
+	fprintf(output,"Obligation Tactic := congruence. \n");
 	struct AutomatoList *automatonPorts = automatoList;
 	//automaton's name
 	strcpy(automatonName,automatonPorts-> automato -> name);
@@ -685,7 +688,7 @@ void input2CoqCA(FILE *f) {
 		fprintf(output, " %s. \n",coqPorts->string);
 
 		//proof of equality between ports:
-		fprintf(output,"Instance modelPortsEqDec : EqDec modelPortsType eq :=\n");
+		fprintf(output,"Program Instance modelPortsEqDec : EqDec modelPortsType eq :=\n");
 		fprintf(output,"\t{equiv_dec x y := \n");
 		fprintf(output,"\t\t match x, y with \n");
 		coqPorts = resultingPorts;
@@ -702,8 +705,8 @@ void input2CoqCA(FILE *f) {
 		}
 		fprintf(output,"\tend\n");
 		fprintf(output,"\t}.\n");
-		fprintf(output,"Proof.\nall: congruence.\n");
-		fprintf(output,"Defined.\n");
+		//fprintf(output,"Proof.\nall: congruence.\n");
+		//fprintf(output,"Defined.\n");
 
 		//free aux var
 		//freeAuxStringList(currPorts);
@@ -734,7 +737,7 @@ void input2CoqCA(FILE *f) {
 		fprintf(output, "\t%s.\n",coqStates->string);
 
 		//proof of equality between states:
-		fprintf(output,"Instance %sEqDec : EqDec %sStatesType eq :=\n",automatonStates->automato->name,automatonStates->automato->name);
+		fprintf(output,"Program Instance %sEqDec : EqDec %sStatesType eq :=\n",automatonStates->automato->name,automatonStates->automato->name);
 		fprintf(output,"\t{equiv_dec x y := \n");
 		fprintf(output,"\t\t match x, y with \n");
 		coqStates = currStates;
@@ -751,8 +754,8 @@ void input2CoqCA(FILE *f) {
 		}
 		fprintf(output,"\tend\n");
 		fprintf(output,"\t}.\n");
-		fprintf(output,"Proof.\nall: congruence.\n");
-		fprintf(output,"Defined.\n");
+		//fprintf(output,"Proof.\nall: congruence.\n");
+		//fprintf(output,"Defined.\n");
 		
 		freeAuxStringList(currStates);
 
