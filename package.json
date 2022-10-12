@@ -9,7 +9,7 @@
 	"dependencies": {
 		"antlr4": "^4.7.2",
 		"archiver": "^3.0.0",
-		"fabric": "^2.6.0",
+		"fabric": "^5.2.4",
 		"http-server": "^0.11.1",
 		"monaco-editor": "^0.15.6"
 	},
